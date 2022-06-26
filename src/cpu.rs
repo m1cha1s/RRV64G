@@ -1,4 +1,6 @@
-use crate::{prelude::MMU, regs::Regs};
+use crate::{exceptions::Exception, prelude::MMU, regs::Regs};
+
+enum OpCode {}
 
 pub struct Cpu {
     mmu: MMU,
@@ -10,5 +12,11 @@ impl Cpu {
         Cpu { mmu, regs }
     }
 
-    pub fn tick(&mut self) {}
+    pub fn clock(&mut self) -> Result<(), Exception> {
+        Ok(())
+    }
+
+    pub fn reset(&mut self) -> &mut Self {
+        self
+    }
 }

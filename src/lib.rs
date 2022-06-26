@@ -9,6 +9,7 @@ type XLEN = u32;
 type XLEN = u64;
 
 pub mod cpu;
+pub mod exceptions;
 pub mod mmu;
 pub mod regs;
 
