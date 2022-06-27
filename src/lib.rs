@@ -3,26 +3,26 @@
 extern crate alloc;
 
 #[cfg(feature = "rv32i")]
-type XLEN = u32;
+pub type XLEN = u32;
 
 #[cfg(feature = "rv64i")]
-type XLEN = u64;
+pub type XLEN = u64;
 
-type BYTE = u8;
-type HALFWORD = u16;
-type WORD = u32;
-type DOUBLEWORD = u64;
-
+pub mod bus;
 pub mod cpu;
 pub mod exceptions;
 pub mod inst;
-pub mod mmu;
+pub mod mem;
+pub mod opcodes;
 pub mod regs;
 
 pub mod prelude {
+    pub use super::bus::*;
     pub use super::cpu::*;
     pub use super::exceptions::*;
-    pub use super::mmu::*;
+    pub use super::mem::*;
+    pub use super::regs::*;
+    pub use super::XLEN;
 }
 
 #[cfg(test)]
