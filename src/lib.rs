@@ -3,10 +3,18 @@
 extern crate alloc;
 
 #[cfg(feature = "rv32i")]
-pub type XLEN = u32;
+mod conf {
+    pub type XLEN = u32;
+    pub type IXLEN = i32;
+}
 
 #[cfg(feature = "rv64i")]
-pub type XLEN = u64;
+mod conf {
+    pub type XLEN = u64;
+    pub type IXLEN = i64;
+}
+
+pub use conf::*;
 
 pub mod bus;
 pub mod cpu;

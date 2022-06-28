@@ -3,7 +3,7 @@ use std::{
     io::{self, Read},
 };
 
-use uemu_rvxxix::prelude::*;
+use rrv64g::prelude::*;
 
 struct Mem {
     pub mem: Vec<u8>,
@@ -96,9 +96,9 @@ fn main() -> io::Result<()> {
     let mut code = Vec::new();
     file.read_to_end(&mut code)?;
 
-    let mut regs = Regs::new();
+    let regs = Regs::new();
     let mut mem: Mem = Mem { mem: code };
-    let mut bus = Bus::new(&mut mem);
+    let bus = Bus::new(&mut mem);
     let mut cpu = Cpu::new(bus, regs);
 
     loop {

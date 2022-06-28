@@ -1,6 +1,6 @@
 use crate::{exceptions::Exception, mem::Memory, XLEN};
 
-const RAM_START: XLEN = 0x00000000;
+pub const RAM_START: XLEN = 0x80000000;
 
 pub struct MemMapEntry {
     pub start: XLEN,
@@ -16,7 +16,9 @@ impl<'a> Bus<'a> {
         Bus { mem }
     }
 
-    pub fn reset(&mut self) {}
+    pub fn reset(&mut self) {
+        self.mem.reset();
+    }
 
     pub fn load8(&self, addr: XLEN) -> Result<u8, Exception> {
         if addr >= RAM_START {
@@ -25,6 +27,7 @@ impl<'a> Bus<'a> {
 
         Err(Exception::AddressOutOfBounds)
     }
+
     pub fn load16(&self, addr: XLEN) -> Result<u16, Exception> {
         if addr >= RAM_START {
             return self.mem.load16(addr - RAM_START);
@@ -32,6 +35,7 @@ impl<'a> Bus<'a> {
 
         Err(Exception::AddressOutOfBounds)
     }
+
     pub fn load32(&self, addr: XLEN) -> Result<u32, Exception> {
         if addr >= RAM_START {
             return self.mem.load32(addr - RAM_START);
@@ -39,6 +43,7 @@ impl<'a> Bus<'a> {
 
         Err(Exception::AddressOutOfBounds)
     }
+
     pub fn load64(&self, addr: XLEN) -> Result<u64, Exception> {
         if addr >= RAM_START {
             return self.mem.load64(addr - RAM_START);
