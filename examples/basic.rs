@@ -10,24 +10,24 @@ struct Mem {
 }
 
 impl Memory for Mem {
-    fn get_size(&self) -> XLEN {
-        self.mem.len() as XLEN
+    fn get_size(&self) -> u64 {
+        self.mem.len() as u64
     }
 
     fn reset(&mut self) {
         self.mem.clear();
     }
 
-    fn load8(&self, addr: XLEN) -> Result<u8, Exception> {
+    fn load8(&self, addr: u64) -> Result<u8, Exception> {
         Ok(self.mem[addr as usize])
     }
 
-    fn load16(&self, addr: XLEN) -> Result<u16, Exception> {
+    fn load16(&self, addr: u64) -> Result<u16, Exception> {
         let addr = addr as usize;
         Ok(self.mem[addr] as u16 | (self.mem[addr + 1] as u16) << 8)
     }
 
-    fn load32(&self, addr: XLEN) -> Result<u32, Exception> {
+    fn load32(&self, addr: u64) -> Result<u32, Exception> {
         let addr = addr as usize;
         Ok(self.mem[addr] as u32
             | (self.mem[addr + 1] as u32) << 8
@@ -35,7 +35,7 @@ impl Memory for Mem {
             | (self.mem[addr + 3] as u32) << 24)
     }
 
-    fn load64(&self, addr: XLEN) -> Result<u64, Exception> {
+    fn load64(&self, addr: u64) -> Result<u64, Exception> {
         let addr = addr as usize;
         Ok(self.mem[addr] as u64
             | (self.mem[addr + 1] as u64) << 8
@@ -47,7 +47,7 @@ impl Memory for Mem {
             | (self.mem[addr + 7] as u64) << 56)
     }
 
-    fn store8(&mut self, addr: XLEN, val: u8) -> Result<(), Exception> {
+    fn store8(&mut self, addr: u64, val: u8) -> Result<(), Exception> {
         let addr = addr as usize;
 
         self.mem[addr] = val;
@@ -55,7 +55,7 @@ impl Memory for Mem {
         Ok(())
     }
 
-    fn store16(&mut self, addr: XLEN, val: u16) -> Result<(), Exception> {
+    fn store16(&mut self, addr: u64, val: u16) -> Result<(), Exception> {
         let addr = addr as usize;
 
         self.mem[addr] = (val & 0xff) as u8;
@@ -64,7 +64,7 @@ impl Memory for Mem {
         Ok(())
     }
 
-    fn store32(&mut self, addr: XLEN, val: u32) -> Result<(), Exception> {
+    fn store32(&mut self, addr: u64, val: u32) -> Result<(), Exception> {
         let addr = addr as usize;
 
         self.mem[addr] = (val & 0xff) as u8;
@@ -75,7 +75,7 @@ impl Memory for Mem {
         Ok(())
     }
 
-    fn store64(&mut self, addr: XLEN, val: u64) -> Result<(), Exception> {
+    fn store64(&mut self, addr: u64, val: u64) -> Result<(), Exception> {
         let addr = addr as usize;
 
         self.mem[addr] = (val & 0xff) as u8;

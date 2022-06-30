@@ -1,8 +1,6 @@
-use crate::XLEN;
-
 pub struct Regs {
-    pub x: [XLEN; 32],
-    pub pc: XLEN,
+    pub x: [u64; 32],
+    pub pc: u64,
 }
 
 impl Regs {
