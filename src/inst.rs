@@ -27,6 +27,25 @@ pub enum Inst {
 
     Ebrake,
     Ecall,
+
+    Lui { rd: usize, imm: i32 },
+    Auipc { rd: usize, imm: i32 },
+
+    Sb { rs1: usize, rs2: usize, imm: i32 },
+    Sh { rs1: usize, rs2: usize, imm: i32 },
+    Sw { rs1: usize, rs2: usize, imm: i32 },
+    Sd { rs1: usize, rs2: usize, imm: i32 },
+
+    Add { rd: usize, rs1: usize, rs2: usize },
+    Sub { rd: usize, rs1: usize, rs2: usize },
+    Sll { rd: usize, rs1: usize, rs2: usize },
+    Slt { rd: usize, rs1: usize, rs2: usize },
+    Sltu { rd: usize, rs1: usize, rs2: usize },
+    Xor { rd: usize, rs1: usize, rs2: usize },
+    Srl { rd: usize, rs1: usize, rs2: usize },
+    Sra { rd: usize, rs1: usize, rs2: usize },
+    Or { rd: usize, rs1: usize, rs2: usize },
+    And { rd: usize, rs1: usize, rs2: usize },
 }
 
 pub enum ImmType {
@@ -54,7 +73,7 @@ impl ImmType {
                 // Differentiate between SRLI and SRAI
                 let shiftop = (imm * 0x400) == 0;
 
-                // Sign extend the immediate and shamt
+                // Sign extend the immediate
                 let imm = ((imm as i32) << 20) >> 20;
 
                 match opcode {
@@ -107,6 +126,43 @@ impl ImmType {
                     _ => Err(Exception::UnknownInstruction),
                 }
             }
+            ImmType::U => {
+                let imm = (inst & 0xfffff000) as i32;
+                let rd = ((inst >> 7) & 0b11111) as usize;
+                
+                match opcode {
+                    0b0010111 => Ok(Inst::Auipc { rd, imm }),
+                    0b0110111 => Ok(Inst::Lui { rd, imm }),
+                    _ => Err(Exception::UnknownInstruction),
+                }   
+            },
+            ImmType::S => {
+                let imm115 = (inst >> 25) & 0b1111111;
+                let imm40 = (inst >> 7) & 0b11111;
+
+                let func3 = (inst >> 12) & 0b111;
+
+                let rs1 = ((inst >> 15) & 0b11111) as usize;
+                let rs2 = ((inst >> 20) & 0b11111) as usize;
+
+                // Merge and sign extend the immediate 
+                let imm = (imm115 << 5) | imm40;
+                let imm = ((imm as i32) << 20) >> 20;
+
+                match opcode {
+                    0b0100011 => match func3 {
+                        0b000 => Ok(Inst::Sb { rs1, rs2, imm }),
+                        0b001 => Ok(Inst::Sh { rs1, rs2, imm }),
+                        0b010 => Ok(Inst::Sw { rs1, rs2, imm }),
+                        0b011 => Ok(Inst::Sd { rs1, rs2, imm }),
+                        _ => Err(Exception::UnknownInstruction),
+                    },
+                    _ => Err(Exception::UnknownInstruction),
+                }
+            },
+            ImmType::R => {
+
+            },
             _ => Err(Exception::UnknownInstruction),
         }
     }
