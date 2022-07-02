@@ -13,7 +13,7 @@ fn it_works() {
 
 #[test]
 fn test_decoding() {
-    let inst = cpu::Cpu::decode(0xf8b43423);
+    let inst = cpu::Cpu::decode(0x0105053b);
 
     if let Ok(inst) = inst {
         println!("{:?}", inst);

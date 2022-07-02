@@ -2,12 +2,12 @@ use crate::prelude::Exception;
 
 #[derive(Debug)]
 pub enum Inst {
-    Addi { rd: usize, rs1: usize, imm: i32 },
-    Slti { rd: usize, rs1: usize, imm: i32 },
+    Addi  { rd: usize, rs1: usize, imm: i32 },
+    Slti  { rd: usize, rs1: usize, imm: i32 },
     Sltiu { rd: usize, rs1: usize, imm: i32 },
-    Xori { rd: usize, rs1: usize, imm: i32 },
-    Ori { rd: usize, rs1: usize, imm: i32 },
-    Andi { rd: usize, rs1: usize, imm: i32 },
+    Xori  { rd: usize, rs1: usize, imm: i32 },
+    Ori   { rd: usize, rs1: usize, imm: i32 },
+    Andi  { rd: usize, rs1: usize, imm: i32 },
 
     Addiw { rd: usize, rs1: usize, imm: i32 },
 
@@ -19,13 +19,13 @@ pub enum Inst {
     Srliw { rd: usize, rs1: usize, shamt: u32 },
     Sraiw { rd: usize, rs1: usize, shamt: u32 },
 
-    Lb { rd: usize, rs1: usize, imm: i32 },
-    Lh { rd: usize, rs1: usize, imm: i32 },
-    Lw { rd: usize, rs1: usize, imm: i32 },
+    Lb  { rd: usize, rs1: usize, imm: i32 },
+    Lh  { rd: usize, rs1: usize, imm: i32 },
+    Lw  { rd: usize, rs1: usize, imm: i32 },
     Lbu { rd: usize, rs1: usize, imm: i32 },
     Lhu { rd: usize, rs1: usize, imm: i32 },
     Lwu { rd: usize, rs1: usize, imm: i32 },
-    Ld { rd: usize, rs1: usize, imm: i32 },
+    Ld  { rd: usize, rs1: usize, imm: i32 },
 
     Fence { rd: usize, rs1: usize, imm: i32 },
 
@@ -34,7 +34,7 @@ pub enum Inst {
     Ebrake,
     Ecall,
 
-    Lui { rd: usize, imm: i32 },
+    Lui   { rd: usize, imm: i32 },
     Auipc { rd: usize, imm: i32 },
 
     Sb { rs1: usize, rs2: usize, imm: i32 },
@@ -42,22 +42,31 @@ pub enum Inst {
     Sw { rs1: usize, rs2: usize, imm: i32 },
     Sd { rs1: usize, rs2: usize, imm: i32 },
 
-    Add { rd: usize, rs1: usize, rs2: usize },
-    Sub { rd: usize, rs1: usize, rs2: usize },
-    Sll { rd: usize, rs1: usize, rs2: usize },
-    Slt { rd: usize, rs1: usize, rs2: usize },
+    Add  { rd: usize, rs1: usize, rs2: usize },
+    Sub  { rd: usize, rs1: usize, rs2: usize },
+    Sll  { rd: usize, rs1: usize, rs2: usize },
+    Slt  { rd: usize, rs1: usize, rs2: usize },
     Sltu { rd: usize, rs1: usize, rs2: usize },
-    Xor { rd: usize, rs1: usize, rs2: usize },
-    Srl { rd: usize, rs1: usize, rs2: usize },
-    Sra { rd: usize, rs1: usize, rs2: usize },
-    Or { rd: usize, rs1: usize, rs2: usize },
-    And { rd: usize, rs1: usize, rs2: usize },
+    Xor  { rd: usize, rs1: usize, rs2: usize },
+    Srl  { rd: usize, rs1: usize, rs2: usize },
+    Sra  { rd: usize, rs1: usize, rs2: usize },
+    Or   { rd: usize, rs1: usize, rs2: usize },
+    And  { rd: usize, rs1: usize, rs2: usize },
 
     Addw { rd: usize, rs1: usize, rs2: usize },
     Subw { rd: usize, rs1: usize, rs2: usize },
     Sllw { rd: usize, rs1: usize, rs2: usize },
     Srlw { rd: usize, rs1: usize, rs2: usize },
     Sraw { rd: usize, rs1: usize, rs2: usize },
+
+	Beq  { rs1: usize, rs2: usize, imm:i32 },
+	Bne  { rs1: usize, rs2: usize, imm:i32 },
+	Blt  { rs1: usize, rs2: usize, imm:i32 },
+	Bge  { rs1: usize, rs2: usize, imm:i32 },
+	Bltu { rs1: usize, rs2: usize, imm:i32 },
+	Bgeu { rs1: usize, rs2: usize, imm:i32 },
+
+	Jal { rd: usize, imm: i32 },
 }
 
 pub enum ImmType {
@@ -187,13 +196,91 @@ impl ImmType {
                 let func3 = (inst >> 12) & 0b111;
                 let rs1 = ((inst >> 15) & 0b11111) as usize;
                 let rs2 = ((inst >> 20) & 0b11111) as usize;
-                let func7 = (inst >> 26) & 0b111111;
+                let func7 = (inst >> 25) & 0b1111111;
 
                 match opcode {
-                    
+                    0b0110011 => match func3 {
+						0b000 => if func7==0 { 
+								Ok(Inst::Add { rd, rs1, rs2 }) 
+							} else { 
+								Ok(Inst::Sub { rd, rs1, rs2 }) 
+							},
+						0b001 => Ok(Inst::Sll { rd, rs1 ,rs2 }),
+						0b010 => Ok(Inst::Slt { rd, rs1 ,rs2 }),
+						0b011 => Ok(Inst::Sltu { rd, rs1 ,rs2 }),
+						0b100 => Ok(Inst::Xor { rd, rs1 ,rs2 }),
+						0b101 => if func7==0 {
+							Ok(Inst::Srl { rd, rs1, rs2 })
+						} else {
+							Ok(Inst::Sra { rd, rs1, rs2 })
+						},
+						0b110 => Ok(Inst::Or { rd, rs1, rs2 }),
+						0b111 => Ok(Inst::And { rd, rs1, rs2 }),
+                    	_ => Err(Exception::UnknownInstruction),
+				    },
+					0b0111011 => match (func7, func3) {
+						(0b0000000, 0b000) => Ok(Inst::Addw { rd, rs1, rs2 }),
+						(0b0100000, 0b000) => Ok(Inst::Subw { rd, rs1, rs2 }),
+						(0b0000000, 0b001) => Ok(Inst::Sllw { rd, rs1, rs2 }),
+						(0b0000000, 0b101) => Ok(Inst::Srlw { rd, rs1, rs2 }),
+						(0b0100000, 0b101) => Ok(Inst::Sraw { rd, rs1, rs2 }),
+                    	(_, _) => Err(Exception::UnknownInstruction),
+					},
                     _ => Err(Exception::UnknownInstruction),
                 }
             },
+			ImmType::B => {
+				let imm12105 = (inst >> 25) & 0b1111111;
+                let imm4111  = (inst >> 7) & 0b11111;
+
+                let func3 = (inst >> 12) & 0b111;
+
+                let rs1 = ((inst >> 15) & 0b11111) as usize;
+                let rs2 = ((inst >> 20) & 0b11111) as usize;
+
+				// Split the immediate 
+				let imm12  = (imm12105 & 0b1000000) >> 6;
+				let imm105 = imm12105 & 0b0111111;
+				let imm41  = (imm4111 & 0b11110) >> 1;
+				let imm11  = imm4111 & 0b00001;
+
+				// Merge the immediate
+				let imm = (imm12 << 12) | (imm11 << 11) | (imm105 << 5) | (imm41 << 1);
+
+				// Sign extend the immediate
+				let imm = ((imm as i32) << 19) >> 19;
+
+				match func3 {
+					0b000 => Ok(Inst::Beq { rs1, rs2, imm }),
+					0b001 => Ok(Inst::Bne { rs1, rs2, imm }),
+					0b100 => Ok(Inst::Blt { rs1, rs2, imm }),
+					0b101 => Ok(Inst::Bge { rs1, rs2, imm }),
+					0b110 => Ok(Inst::Bltu { rs1, rs2, imm }),
+					0b111 => Ok(Inst::Bgeu { rs1, rs2, imm }),
+            		_ => Err(Exception::UnknownInstruction),
+				}
+			},
+			ImmType::J => {
+				let rd = ((inst >> 7) & 0b11111) as usize;
+				let imm20101111912 = (inst >> 12) & 0xfffff;
+
+				// Split the immediate
+				let imm20  = (imm20101111912 >> 19) & 0b1;
+				let imm101 = (imm20101111912 >> 9) & 0b1111111111;
+				let imm11  = (imm20101111912 >> 8) & 0b1;
+				let imm1912 = imm20101111912 & 0b11111111;
+
+				// Merge immediate
+				let imm = (imm20 << 20) | (imm1912 << 12) | (imm11 << 11) | (imm101 << 1);
+
+				// Sign extend the immediate
+				let imm = ((imm as i32) << 11) >> 11;
+
+				match opcode {
+					0b1101111 => Ok(Inst::Jal { rd, imm }),
+            		_ => Err(Exception::UnknownInstruction),
+				}
+			},
             _ => Err(Exception::UnknownInstruction),
         }
     }
@@ -259,7 +346,7 @@ pub const ENCODING_TABLE: [Option<ImmType>; 128] = [
     /* 0b0111000 */ None,
     /* 0b0111001 */ None,
     /* 0b0111010 */ None,
-    /* 0b0111011 */ Some(ImmType::S),
+    /* 0b0111011 */ Some(ImmType::R),
     /* 0b0111100 */ None,
     /* 0b0111101 */ None,
     /* 0b0111110 */ None,
