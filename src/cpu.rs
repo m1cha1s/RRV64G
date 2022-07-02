@@ -35,6 +35,7 @@ impl<'a> Cpu<'a> {
         Ok(inst)
     }
 
+    // TODO: Make it private
     pub fn decode(inst: u32) -> Result<Inst, Exception> {
         let opcode = inst & 0b1111111;
 

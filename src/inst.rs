@@ -9,9 +9,15 @@ pub enum Inst {
     Ori { rd: usize, rs1: usize, imm: i32 },
     Andi { rd: usize, rs1: usize, imm: i32 },
 
+    Addiw { rd: usize, rs1: usize, imm: i32 },
+
     Slli { rd: usize, rs1: usize, shamt: u32 },
     Srli { rd: usize, rs1: usize, shamt: u32 },
     Srai { rd: usize, rs1: usize, shamt: u32 },
+
+    Slliw { rd: usize, rs1: usize, shamt: u32 },
+    Srliw { rd: usize, rs1: usize, shamt: u32 },
+    Sraiw { rd: usize, rs1: usize, shamt: u32 },
 
     Lb { rd: usize, rs1: usize, imm: i32 },
     Lh { rd: usize, rs1: usize, imm: i32 },
@@ -46,6 +52,12 @@ pub enum Inst {
     Sra { rd: usize, rs1: usize, rs2: usize },
     Or { rd: usize, rs1: usize, rs2: usize },
     And { rd: usize, rs1: usize, rs2: usize },
+
+    Addw { rd: usize, rs1: usize, rs2: usize },
+    Subw { rd: usize, rs1: usize, rs2: usize },
+    Sllw { rd: usize, rs1: usize, rs2: usize },
+    Srlw { rd: usize, rs1: usize, rs2: usize },
+    Sraw { rd: usize, rs1: usize, rs2: usize },
 }
 
 pub enum ImmType {
@@ -123,6 +135,16 @@ impl ImmType {
                             Err(Exception::UnknownInstruction)
                         }
                     }
+                    0b0011011 => match func3 {
+                        0b000 => Ok(Inst::Addiw { rd, rs1, imm }),
+                        0b001 => Ok(Inst::Slliw { rd, rs1, shamt }),
+                        0b101 => if shiftop {
+                            Ok(Inst::Srliw { rd, rs1, shamt })
+                        } else {
+                            Ok(Inst::Sraiw { rd, rs1, shamt })
+                        },
+                        _ => Err(Exception::UnknownInstruction),
+                    },
                     _ => Err(Exception::UnknownInstruction),
                 }
             }
@@ -161,7 +183,16 @@ impl ImmType {
                 }
             },
             ImmType::R => {
+                let rd = ((inst >> 7) & 0b11111) as usize;
+                let func3 = (inst >> 12) & 0b111;
+                let rs1 = ((inst >> 15) & 0b11111) as usize;
+                let rs2 = ((inst >> 20) & 0b11111) as usize;
+                let func7 = (inst >> 26) & 0b111111;
 
+                match opcode {
+                    
+                    _ => Err(Exception::UnknownInstruction),
+                }
             },
             _ => Err(Exception::UnknownInstruction),
         }
@@ -196,7 +227,7 @@ pub const ENCODING_TABLE: [Option<ImmType>; 128] = [
     /* 0b0011000 */ None,
     /* 0b0011001 */ None,
     /* 0b0011010 */ None,
-    /* 0b0011011 */ None,
+    /* 0b0011011 */ Some(ImmType::I),
     /* 0b0011100 */ None,
     /* 0b0011101 */ None,
     /* 0b0011110 */ None,
@@ -228,7 +259,7 @@ pub const ENCODING_TABLE: [Option<ImmType>; 128] = [
     /* 0b0111000 */ None,
     /* 0b0111001 */ None,
     /* 0b0111010 */ None,
-    /* 0b0111011 */ None,
+    /* 0b0111011 */ Some(ImmType::S),
     /* 0b0111100 */ None,
     /* 0b0111101 */ None,
     /* 0b0111110 */ None,
