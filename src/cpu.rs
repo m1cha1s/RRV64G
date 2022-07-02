@@ -58,7 +58,7 @@ impl<'a> Cpu<'a> {
 				self.regs.x[rd] = self.regs.x[rs1].wrapping_add(self.regs.x[rs2]);
 				Ok(())
 			},
-			_ => Err(Exception::InstructionNotImplemented),
+			_ => Err(Exception::InstructionNotImplemented(inst)),
 		}
     }
 }

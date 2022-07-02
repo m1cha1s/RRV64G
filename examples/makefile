@@ -1,0 +1,8 @@
+CC=riscv64-unknown-elf-gcc
+
+all:
+	${CC} -Wl,-Ttext=0x00000000 -nostdlib fib.c -o fib.o
+	riscv64-unknown-elf-objcopy -O binary  fib.o fib.bin 
+
+clean:
+	rm -f fib.o fib.bin
