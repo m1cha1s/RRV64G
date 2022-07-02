@@ -47,8 +47,18 @@ impl<'a> Cpu<'a> {
     }
 
     fn execute(&mut self, inst: u32) -> Result<(), Exception> {
-        let inst = Self::decode(inst);
+        let inst = Self::decode(inst)?;
 
-        Ok(())
+		match inst {
+			Inst::Addi { rd, rs1, imm } => {
+				self.regs.x[rd] = self.regs.x[rs1].wrapping_add(imm as u64);
+				Ok(())
+			},
+			Inst::Add { rd, rs1, rs2 } => {
+				self.regs.x[rd] = self.regs.x[rs1].wrapping_add(self.regs.x[rs2]);
+				Ok(())
+			},
+			_ => Err(Exception::InstructionNotImplemented),
+		}
     }
 }

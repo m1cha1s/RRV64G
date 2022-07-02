@@ -281,7 +281,6 @@ impl ImmType {
             		_ => Err(Exception::UnknownInstruction),
 				}
 			},
-            _ => Err(Exception::UnknownInstruction),
         }
     }
 }

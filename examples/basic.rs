@@ -109,13 +109,7 @@ fn main() -> io::Result<()> {
         match e {
             Ok(_) => {}
             Err(err) => {
-                match err {
-                    Exception::InstructionAddressMisalignment => {
-                        println!("Error: Instruction address misalignment!")
-                    }
-                    Exception::AddressOutOfBounds => println!("Error: Address out of bounds!"),
-                    Exception::UnknownInstruction => println!("Error: Unknown instruction!"),
-                }
+				println!("{:?}", err);
                 break;
             }
         }

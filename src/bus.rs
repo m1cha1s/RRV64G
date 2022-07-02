@@ -1,6 +1,6 @@
 use crate::{exceptions::Exception, mem::Memory};
 
-pub const RAM_START: u64 = 0x80000000;
+pub const RAM_START: u64 = 0x00000000;
 
 pub struct MemMapEntry {
     pub start: u64,
