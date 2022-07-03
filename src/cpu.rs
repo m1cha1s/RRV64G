@@ -1,5 +1,5 @@
 use crate::{
-    bus::Bus,
+    bus::{Bus, MemMapEntry},
     exceptions::Exception,
     inst::{Inst, ENCODING_TABLE},
     regs::Regs,
@@ -11,8 +11,8 @@ pub struct Cpu<'a> {
 }
 
 impl<'a> Cpu<'a> {
-    pub fn new(bus: Bus<'a>, regs: Regs) -> Self {
-        Cpu { bus, regs }
+    pub fn new(mem_map: &'a mut [MemMapEntry<'a>]) -> Self {
+        Cpu { bus: Bus::new(mem_map), regs: Regs::new() }
     }
 
     pub fn tick(&mut self) -> Result<(), Exception> {
