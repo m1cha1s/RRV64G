@@ -43,7 +43,8 @@ impl MemIntf for Mem {
 fn main() -> io::Result<()> {
 
 	// Loading program from file
-    let mut file = File::open("./examples/add-addi.bin")?;
+//    let mut file = File::open("./examples/add-addi.bin")?;
+    let mut file = File::open("./examples/fib.bin")?;
     let mut code = Vec::new();
     file.read_to_end(&mut code)?;
 
