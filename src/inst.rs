@@ -2,14 +2,14 @@ use crate::prelude::Exception;
 
 #[derive(Debug)]
 pub enum Inst {
-    Addi  { rd: usize, rs1: usize, imm: i32 },
-    Slti  { rd: usize, rs1: usize, imm: i32 },
-    Sltiu { rd: usize, rs1: usize, imm: i32 },
-    Xori  { rd: usize, rs1: usize, imm: i32 },
-    Ori   { rd: usize, rs1: usize, imm: i32 },
-    Andi  { rd: usize, rs1: usize, imm: i32 },
+    Addi  { rd: usize, rs1: usize, imm: i64 },
+    Slti  { rd: usize, rs1: usize, imm: i64 },
+    Sltiu { rd: usize, rs1: usize, imm: i64 },
+    Xori  { rd: usize, rs1: usize, imm: i64 },
+    Ori   { rd: usize, rs1: usize, imm: i64 },
+    Andi  { rd: usize, rs1: usize, imm: i64 },
 
-    Addiw { rd: usize, rs1: usize, imm: i32 },
+    Addiw { rd: usize, rs1: usize, imm: i64 },
 
     Slli { rd: usize, rs1: usize, shamt: u32 },
     Srli { rd: usize, rs1: usize, shamt: u32 },
@@ -19,28 +19,28 @@ pub enum Inst {
     Srliw { rd: usize, rs1: usize, shamt: u32 },
     Sraiw { rd: usize, rs1: usize, shamt: u32 },
 
-    Lb  { rd: usize, rs1: usize, imm: i32 },
-    Lh  { rd: usize, rs1: usize, imm: i32 },
-    Lw  { rd: usize, rs1: usize, imm: i32 },
-    Lbu { rd: usize, rs1: usize, imm: i32 },
-    Lhu { rd: usize, rs1: usize, imm: i32 },
-    Lwu { rd: usize, rs1: usize, imm: i32 },
-    Ld  { rd: usize, rs1: usize, imm: i32 },
+    Lb  { rd: usize, rs1: usize, imm: i64 },
+    Lh  { rd: usize, rs1: usize, imm: i64 },
+    Lw  { rd: usize, rs1: usize, imm: i64 },
+    Lbu { rd: usize, rs1: usize, imm: i64 },
+    Lhu { rd: usize, rs1: usize, imm: i64 },
+    Lwu { rd: usize, rs1: usize, imm: i64 },
+    Ld  { rd: usize, rs1: usize, imm: i64 },
 
-    Fence { rd: usize, rs1: usize, imm: i32 },
+    Fence { rd: usize, rs1: usize, imm: i64 },
 
-    Jalr { rd: usize, rs1: usize, imm: i32 },
+    Jalr { rd: usize, rs1: usize, imm: i64 },
 
     Ebrake,
     Ecall,
 
-    Lui   { rd: usize, imm: i32 },
-    Auipc { rd: usize, imm: i32 },
+    Lui   { rd: usize, imm: i64 },
+    Auipc { rd: usize, imm: i64 },
 
-    Sb { rs1: usize, rs2: usize, imm: i32 },
-    Sh { rs1: usize, rs2: usize, imm: i32 },
-    Sw { rs1: usize, rs2: usize, imm: i32 },
-    Sd { rs1: usize, rs2: usize, imm: i32 },
+    Sb { rs1: usize, rs2: usize, imm: i64 },
+    Sh { rs1: usize, rs2: usize, imm: i64 },
+    Sw { rs1: usize, rs2: usize, imm: i64 },
+    Sd { rs1: usize, rs2: usize, imm: i64 },
 
     Add  { rd: usize, rs1: usize, rs2: usize },
     Sub  { rd: usize, rs1: usize, rs2: usize },
@@ -59,14 +59,14 @@ pub enum Inst {
     Srlw { rd: usize, rs1: usize, rs2: usize },
     Sraw { rd: usize, rs1: usize, rs2: usize },
 
-	Beq  { rs1: usize, rs2: usize, imm:i32 },
-	Bne  { rs1: usize, rs2: usize, imm:i32 },
-	Blt  { rs1: usize, rs2: usize, imm:i32 },
-	Bge  { rs1: usize, rs2: usize, imm:i32 },
-	Bltu { rs1: usize, rs2: usize, imm:i32 },
-	Bgeu { rs1: usize, rs2: usize, imm:i32 },
+	Beq  { rs1: usize, rs2: usize, imm:i64 },
+	Bne  { rs1: usize, rs2: usize, imm:i64 },
+	Blt  { rs1: usize, rs2: usize, imm:i64 },
+	Bge  { rs1: usize, rs2: usize, imm:i64 },
+	Bltu { rs1: usize, rs2: usize, imm:i64 },
+	Bgeu { rs1: usize, rs2: usize, imm:i64 },
 
-	Jal { rd: usize, imm: i32 },
+	Jal { rd: usize, imm: i64 },
 }
 
 pub enum ImmType {
@@ -96,6 +96,7 @@ impl ImmType {
 
                 // Sign extend the immediate
                 let imm = ((imm as i32) << 20) >> 20;
+				let imm = imm as i64;
 
                 match opcode {
                     0b0000011 => match func3 {
@@ -159,6 +160,7 @@ impl ImmType {
             }
             ImmType::U => {
                 let imm = (inst & 0xfffff000) as i32;
+				let imm = imm as i64;
                 let rd = ((inst >> 7) & 0b11111) as usize;
                 
                 match opcode {
@@ -179,6 +181,7 @@ impl ImmType {
                 // Merge and sign extend the immediate 
                 let imm = (imm115 << 5) | imm40;
                 let imm = ((imm as i32) << 20) >> 20;
+				let imm = imm as i64;
 
                 match opcode {
                     0b0100011 => match func3 {
@@ -249,6 +252,7 @@ impl ImmType {
 
 				// Sign extend the immediate
 				let imm = ((imm as i32) << 19) >> 19;
+				let imm = imm as i64;
 
 				match func3 {
 					0b000 => Ok(Inst::Beq { rs1, rs2, imm }),
@@ -275,6 +279,7 @@ impl ImmType {
 
 				// Sign extend the immediate
 				let imm = ((imm as i32) << 11) >> 11;
+				let imm = imm as i64;
 
 				match opcode {
 					0b1101111 => Ok(Inst::Jal { rd, imm }),
