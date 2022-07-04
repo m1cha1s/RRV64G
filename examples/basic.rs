@@ -55,6 +55,7 @@ fn main() -> io::Result<()> {
 	// Create a memory map with our memory
 	let mem_map: &mut [MemMapEntry] = &mut [
 		(
+			MemType::Ram,
 			MemLoc { start: 0x00000000, len: mem.mem.len() as u64 }, 
 			&mut mem,
 		),
@@ -77,6 +78,10 @@ fn main() -> io::Result<()> {
                 break;
             }
         }
+
+		if cpu.regs.pc == 0 {
+			break;
+		}
     }
 
     Ok(())

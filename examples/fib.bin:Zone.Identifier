@@ -1,4 +1,4 @@
 [ZoneTransfer]
 ZoneId=3
-ReferrerUrl=https://github.com/edubart/riscvm/blob/master/examples/fib.bin
-HostUrl=https://raw.githubusercontent.com/edubart/riscvm/master/examples/fib.bin
+ReferrerUrl=https://github.com/d0iasm/rvemu-for-book/blob/main/02/fib.bin
+HostUrl=https://raw.githubusercontent.com/d0iasm/rvemu-for-book/main/02/fib.bin

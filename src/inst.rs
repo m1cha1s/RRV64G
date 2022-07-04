@@ -131,7 +131,7 @@ impl ImmType {
                         _ => Err(Exception::UnknownInstruction),
                     },
                     0b1100111 => match func3 {
-                        0b000 => Ok(Inst::Jalr { rd, rs1, imm }),
+                        0b000 => Ok(Inst::Jalr { rd, rs1, imm: imm*2 }),
                         _ => Err(Exception::UnknownInstruction),
                     },
                     0b1110011 => {
@@ -255,12 +255,12 @@ impl ImmType {
 				let imm = imm as i64;
 
 				match func3 {
-					0b000 => Ok(Inst::Beq { rs1, rs2, imm }),
-					0b001 => Ok(Inst::Bne { rs1, rs2, imm }),
-					0b100 => Ok(Inst::Blt { rs1, rs2, imm }),
-					0b101 => Ok(Inst::Bge { rs1, rs2, imm }),
-					0b110 => Ok(Inst::Bltu { rs1, rs2, imm }),
-					0b111 => Ok(Inst::Bgeu { rs1, rs2, imm }),
+					0b000 => Ok(Inst::Beq { rs1, rs2, imm: imm*2 }),
+					0b001 => Ok(Inst::Bne { rs1, rs2, imm: imm*2 }),
+					0b100 => Ok(Inst::Blt { rs1, rs2, imm: imm*2 }),
+					0b101 => Ok(Inst::Bge { rs1, rs2, imm: imm*2 }),
+					0b110 => Ok(Inst::Bltu { rs1, rs2, imm: imm*2 }),
+					0b111 => Ok(Inst::Bgeu { rs1, rs2, imm: imm*2 }),
             		_ => Err(Exception::UnknownInstruction),
 				}
 			},

@@ -1,5 +1,5 @@
 use crate::{
-    bus::{Bus, MemMapEntry},
+    bus::{Bus, MemMapEntry, MemType},
     exceptions::Exception,
     inst::{Inst, ENCODING_TABLE},
     regs::Regs,
@@ -12,7 +12,12 @@ pub struct Cpu<'a> {
 
 impl<'a> Cpu<'a> {
     pub fn new(mem_map: &'a mut [MemMapEntry<'a>]) -> Self {
-        Cpu { bus: Bus::new(mem_map), regs: Regs::new() }
+        let mut cpu = Cpu { bus: Bus::new(mem_map), regs: Regs::new() };
+		
+		let (_, ram_loc, _) = cpu.bus.mem_map.iter().find(|(typ, _, _)| *typ == MemType::Ram).unwrap();
+		cpu.regs.x[2] = ram_loc.start + ram_loc.len;
+
+		cpu
     }
 
     pub fn tick(&mut self) -> Result<Inst, Exception> {
@@ -46,6 +51,8 @@ impl<'a> Cpu<'a> {
 
     fn execute(&mut self, inst: u32) -> Result<Inst, Exception> {
         let inst = Self::decode(inst)?;
+
+		self.regs.x[0] = 0;
 
 		match inst {
 			Inst::Addi { rd, rs1, imm } => {
@@ -184,47 +191,47 @@ impl<'a> Cpu<'a> {
 			},
 			Inst::Jal { rd, imm } => {
 				self.regs.x[rd] = self.regs.pc;
-				self.regs.pc = (self.regs.pc).wrapping_add((imm as u64)<<2).wrapping_sub(4);
+				self.regs.pc = (self.regs.pc).wrapping_add(imm as u64).wrapping_sub(4);
 				Ok(inst)
 			},
 			Inst::Jalr { rd, rs1, imm } => {
 				self.regs.x[rd] = self.regs.pc;
-				self.regs.pc = (self.regs.x[rs1]).wrapping_add(imm as u64).wrapping_sub(4) & (!0b1);
+				self.regs.pc = (self.regs.x[rs1]).wrapping_add(imm as u64) & (!0b1);
 				Ok(inst)
 			},
 			Inst::Beq { rs1, rs2, imm } => {
 				if self.regs.x[rs1] == self.regs.x[rs2] {
-					self.regs.pc = (self.regs.pc).wrapping_add((imm as u64)<<2).wrapping_sub(4);
+					self.regs.pc = (self.regs.pc).wrapping_add(imm as u64).wrapping_sub(4);
 				}
 				Ok(inst)
 			},
 			Inst::Bne { rs1, rs2, imm } => {
 				if self.regs.x[rs1] != self.regs.x[rs2] {
-					self.regs.pc = (self.regs.pc).wrapping_add((imm as u64)<<2).wrapping_sub(4);
+					self.regs.pc = (self.regs.pc).wrapping_add(imm as u64).wrapping_sub(4);
 				}
 				Ok(inst)
 			},
 			Inst::Blt { rs1, rs2, imm } => {
 				if (self.regs.x[rs1] as i64) < self.regs.x[rs2] as i64 {
-					self.regs.pc = (self.regs.pc).wrapping_add((imm as u64)<<2).wrapping_sub(4);
+					self.regs.pc = (self.regs.pc).wrapping_add(imm as u64).wrapping_sub(4);
 				}
 				Ok(inst)
 			},
 			Inst::Bltu { rs1, rs2, imm } => {
 				if self.regs.x[rs1] < self.regs.x[rs2] {
-					self.regs.pc = (self.regs.pc).wrapping_add((imm as u64)<<2).wrapping_sub(4);
+					self.regs.pc = (self.regs.pc).wrapping_add(imm as u64).wrapping_sub(4);
 				}
 				Ok(inst)
 			},
 			Inst::Bge { rs1, rs2, imm } => {
 				if (self.regs.x[rs1] as i64) >= self.regs.x[rs2] as i64 {
-					self.regs.pc = (self.regs.pc).wrapping_add((imm as u64)<<2).wrapping_sub(4);
+					self.regs.pc = (self.regs.pc).wrapping_add(imm as u64).wrapping_sub(4);
 				}
 				Ok(inst)
 			},
 			Inst::Bgeu { rs1, rs2, imm } => {
 				if self.regs.x[rs1] >= self.regs.x[rs2] {
-					self.regs.pc = (self.regs.pc).wrapping_add((imm as u64)<<2).wrapping_sub(4);
+					self.regs.pc = (self.regs.pc).wrapping_add(imm as u64).wrapping_sub(4);
 				}
 				Ok(inst)
 			},
