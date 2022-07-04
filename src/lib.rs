@@ -6,7 +6,6 @@ pub mod bus;
 pub mod cpu;
 pub mod exceptions;
 pub mod inst;
-//pub mod mem;
 pub mod regs;
 
 pub mod prelude {
@@ -16,6 +15,3 @@ pub mod prelude {
 //    pub use super::mem::*;
     pub use super::regs::*;
 }
-
-#[cfg(test)]
-mod tests;

@@ -29,39 +29,44 @@ impl<'a> Bus<'a> {
     }
 
     pub fn load8(&self, addr: u64) -> Result<u8, Exception> {
-        Err(Exception::AddressOutOfBounds)
+        Err(Exception::AddressOutOfBounds(addr))
     }
 
     pub fn load16(&self, addr: u64) -> Result<u16, Exception> {
-        Err(Exception::AddressOutOfBounds)
+        Err(Exception::AddressOutOfBounds(addr))
     }
 
     pub fn load32(&self, addr: u64) -> Result<u32, Exception> {
-		if let Some((_, intf)) = self.mem_map.iter()
-											.find(|(entry, _)| addr >= entry.start && addr < entry.len + entry.start ) {
-			intf.load(addr)
+		if let Some((entry, intf)) = self.mem_map.iter()
+			.find(|(entry, _)| addr >= entry.start && addr < entry.len + entry.start ) {
+			intf.load(addr - entry.start)
 		} else {
-        	Err(Exception::AddressOutOfBounds)
+        	Err(Exception::AddressOutOfBounds(addr))
 		}
     }
 
     pub fn load64(&self, addr: u64) -> Result<u64, Exception> {
-        Err(Exception::AddressOutOfBounds)
+		if let Some((entry, intf)) = self.mem_map.iter()
+			.find(|(entry, _)| addr >= entry.start && addr + 1 < entry.len + entry.start ) {
+			Ok(intf.load(addr - entry.start)? as u64 | (intf.load(addr - entry.start + 1)? as u64) << 32)
+		} else {
+        	Err(Exception::AddressOutOfBounds(addr))
+		}
     }
 
     pub fn store8(&mut self, addr: u64, val: u8) -> Result<(), Exception> {
-        Err(Exception::AddressOutOfBounds)
+        Err(Exception::AddressOutOfBounds(addr))
     }
 
     pub fn store16(&mut self, addr: u64, val: u16) -> Result<(), Exception> {
-        Err(Exception::AddressOutOfBounds)
+        Err(Exception::AddressOutOfBounds(addr))
     }
 
     pub fn store32(&mut self, addr: u64, val: u32) -> Result<(), Exception> {
-        Err(Exception::AddressOutOfBounds)
+        Err(Exception::AddressOutOfBounds(addr))
     }
 
     pub fn store64(&mut self, addr: u64, val: u64) -> Result<(), Exception> {
-        Err(Exception::AddressOutOfBounds)
+        Err(Exception::AddressOutOfBounds(addr))
     }
 }

@@ -22,7 +22,7 @@ impl MemIntf for Mem {
 				| (self.mem[addr+2] as u32) << 16
 				| (self.mem[addr+3] as u32) << 24)
 		} else {
-			Err(Exception::AddressOutOfBounds)
+			Err(Exception::AddressOutOfBounds(addr as u64))
 		}
 	}
 
@@ -35,7 +35,7 @@ impl MemIntf for Mem {
 			self.mem[addr + 3] = ((val >> 24) & 0xff) as u8;
 			Ok(())
 		} else {
-			Err(Exception::AddressOutOfBounds)
+			Err(Exception::AddressOutOfBounds(addr as u64))
 		}
 	}
 }
@@ -47,6 +47,7 @@ fn main() -> io::Result<()> {
     let mut file = File::open("./examples/fib.bin")?;
     let mut code = Vec::new();
     file.read_to_end(&mut code)?;
+	code.resize(1024*1024*128, 0);
 
 	// Create a memory with our program
     let mut mem: Mem = Mem { mem: code };
@@ -62,13 +63,15 @@ fn main() -> io::Result<()> {
 	// Create the rest of the emulator
     let mut cpu = Cpu::new(mem_map);
 
-    loop {
+    println!("Regs: {:?}, PC: {}", cpu.regs.x, cpu.regs.pc);
+    
+	loop {
         let e = cpu.tick();
 
         println!("Regs: {:?}, PC: {}", cpu.regs.x, cpu.regs.pc);
 
         match e {
-            Ok(_) => {}
+            Ok(inst) => println!("{:?}", inst),
             Err(err) => {
 				println!("{:?}", err);
                 break;

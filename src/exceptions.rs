@@ -3,7 +3,7 @@ use crate::inst::Inst;
 #[derive(Debug)]
 pub enum Exception {
     InstructionAddressMisalignment,
-    AddressOutOfBounds,
+    AddressOutOfBounds(u64),
     UnknownInstruction,
 	InstructionNotImplemented(Inst),
 }

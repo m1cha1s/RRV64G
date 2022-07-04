@@ -31,7 +31,7 @@ pub enum Inst {
 
     Jalr { rd: usize, rs1: usize, imm: i64 },
 
-    Ebrake,
+    Ebreak,
     Ecall,
 
     Lui   { rd: usize, imm: i64 },
@@ -138,7 +138,7 @@ impl ImmType {
                         if func3 == 0 && rs1 == 0 && rd == 0 {
                             match imm {
                                 0 => Ok(Inst::Ecall),
-                                1 => Ok(Inst::Ebrake),
+                                1 => Ok(Inst::Ebreak),
                                 _ => Err(Exception::UnknownInstruction),
                             }
                         } else {
