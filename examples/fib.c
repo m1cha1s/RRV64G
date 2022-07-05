@@ -1,8 +1,16 @@
 int fib(int n);
+
+int test();
+
 int main() {
-    return fib(10);
+    return fib(1000000);
+	//return test();
+	//return 123456;
 }
 
+int test() {
+	return 139586;
+}
 int fib(int n) {
     if (n == 0 || n == 1)
         return n;

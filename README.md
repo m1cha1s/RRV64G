@@ -1,6 +1,10 @@
-# RRV64G
-A small RV64G complient RISC-V core implemented in no_std Rust
-Mayby will be converted to RV64GC and thus may be renamed to RRV64GC for even more compatibility
+# RRV64IMAZicsr
+A small RV64IMAZicsr complient RISC-V core implemented in no_std Rust
+
+## Goals
+- Enable simple multicore
+- Can run xv6
+- Is no_std
 
 ## Decoding
 
@@ -12,6 +16,15 @@ Mayby will be converted to RV64GC and thus may be renamed to RRV64GC for even mo
 - [x] U-type
 - [x] J-type
 
+### M extension
+- [ ] R-type
+
+### A extension
+- [ ] R-type
+
+### Zicsr extension
+- [ ] I-type
+
 ## Execution
 
 ### rv64i
@@ -21,3 +34,12 @@ Mayby will be converted to RV64GC and thus may be renamed to RRV64GC for even mo
 - [x] B-type
 - [x] U-type
 - [x] J-type
+
+### M extension
+- [ ] R-type
+
+### A extension
+- [ ] R-type
+
+### Zicsr extension
+- [ ] I-type

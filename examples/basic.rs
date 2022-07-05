@@ -64,13 +64,9 @@ fn main() -> io::Result<()> {
 	// Create the rest of the emulator
     let mut cpu = Cpu::new(mem_map);
 
-    println!("Regs: {:?}, PC: {}", cpu.regs.x, cpu.regs.pc);
-    
+
 	loop {
         let e = cpu.tick();
-
-		println!("--------------------------------------------");
-        println!("Regs: {:?}, PC: {}", cpu.regs.x, cpu.regs.pc);
 
         match e {
             Ok(inst) => println!("{:?}", inst),
@@ -80,7 +76,7 @@ fn main() -> io::Result<()> {
             }
         }
 
-		if cpu.regs.pc == 0 {
+		if cpu.regs.pc == 0 { 
 			break;
 		}
     }
