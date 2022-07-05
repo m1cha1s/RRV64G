@@ -69,6 +69,7 @@ fn main() -> io::Result<()> {
 	loop {
         let e = cpu.tick();
 
+		println!("--------------------------------------------");
         println!("Regs: {:?}, PC: {}", cpu.regs.x, cpu.regs.pc);
 
         match e {

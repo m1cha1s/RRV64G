@@ -37,15 +37,17 @@ impl MemIntf for Mem {
     }
 }
 
-macro_rules! create_cpu {
-	($code:expr) => {
-	}
+#[test]
+fn decoding() {
+	println!("{:?}", Cpu::decode(0xfae7d4e3));
+
+	assert_eq!(0, 1);
 }
 
 #[test]
 fn integer_arithmetic() {
 	let code = vec![
-		0x13, 0x08, 0x50, 0x00, // addi x16, x0, 5
+		0x13, 0x08, 0x50, 0x00, // addi x16, x0, 5 => mv 5 to x16
 	];
 
 	// Create a memory with our program
@@ -54,6 +56,7 @@ fn integer_arithmetic() {
 	// Create a memory map with our memory
 	let mem_map: &mut [MemMapEntry] = &mut [
 		(
+			MemType::Ram,
 			MemLoc { start: 0x00000000, len: mem.mem.len() as u64 },
 			&mut mem,
 		),
@@ -66,5 +69,5 @@ fn integer_arithmetic() {
 
 	println!("{:?}", e);
 
-	assert_eq!(1, 0);
+	assert!(cpu.regs.x[16] == 5, "Addi fail");
 }

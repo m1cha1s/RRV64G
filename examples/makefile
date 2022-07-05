@@ -1,7 +1,7 @@
 CC=riscv64-unknown-elf-gcc
 
 all:
-	${CC} -Wl,-Ttext=0x00000000 -nostdlib -nostartfiles fib.c -o fib.o
+	${CC} -Wl,-Ttext=0x00000000 -nostdlib -march=rv64i -mabi=lp64 fib.c -o fib.o
 	riscv64-unknown-elf-objcopy -O binary  fib.o fib.bin 
 
 clean:

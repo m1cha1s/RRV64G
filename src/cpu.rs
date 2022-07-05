@@ -224,7 +224,7 @@ impl<'a> Cpu<'a> {
 				Ok(inst)
 			},
 			Inst::Bge { rs1, rs2, imm } => {
-				if (self.regs.x[rs1] as i64) >= self.regs.x[rs2] as i64 {
+				if (self.regs.x[rs1] as i64) >= (self.regs.x[rs2] as i64) {
 					self.regs.pc = (self.regs.pc).wrapping_add(imm as u64).wrapping_sub(4);
 				}
 				Ok(inst)
