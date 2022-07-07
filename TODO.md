@@ -22,7 +22,7 @@
 
 ## Decoding
 
-- [ ] rv64i
+- [x] rv64i
   - [x] R-type
   - [x] I-type
   - [x] S-type
@@ -41,7 +41,7 @@
 
 ## Execution
 
-- [ ] rv64i
+- [x] rv64i
   - [x] R-type
   - [x] I-type
   - [x] S-type
