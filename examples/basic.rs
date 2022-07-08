@@ -52,33 +52,20 @@ fn main() -> io::Result<()> {
 	// Create a memory with our program
     let mut mem: Mem = Mem { mem: code };
 
-	// Create a memory map with our memory
-	let mem_map: &mut [MemMapEntry] = &mut [
-		(
-			MemType::Ram,
-			MemLoc { start: 0x00000000, len: mem.mem.len() as u64 }, 
-			&mut mem,
-		),
-	];
-	
-	// Create the rest of the emulator
-    let mut cpu = Cpu::new(mem_map);
+	let mut vm = VM::new(&mut mem, 1024*1024*128);
 
+	vm.cpu.pc = 0x8000_0000;
 
 	loop {
-        let e = cpu.tick();
+        let e = vm.tick();
 
         match e {
-            Ok(inst) => println!("{:?}", inst),
+            Ok(()) => println!("Tick"),
             Err(err) => {
 				println!("{:?}", err);
                 break;
             }
         }
-
-		if cpu.regs.pc == 0 { 
-			break;
-		}
     }
 
     Ok(())

@@ -6,12 +6,11 @@ pub mod bus;
 pub mod cpu;
 pub mod exceptions;
 pub mod inst;
-pub mod regs;
+pub mod vm;
 
 pub mod prelude {
     pub use super::bus::*;
     pub use super::cpu::*;
     pub use super::exceptions::*;
-//    pub use super::mem::*;
-    pub use super::regs::*;
+	pub use super::vm::*;
 }

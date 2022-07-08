@@ -6,4 +6,5 @@ pub enum Exception {
     AddressOutOfBounds(u64),
     UnknownInstruction,
 	InstructionNotImplemented(Inst),
+	VMExit,
 }
