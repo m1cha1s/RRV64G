@@ -283,7 +283,52 @@ impl Cpu {
 			Inst::Ebreak {  } => Ok(inst),
 
 			// CSRs implementation
-			Inst::Csrrw { rd, rs1, csr } => {
+			Inst::Csrrw  { rd, rs1, csr } => {
+				if rd != 0 {
+					self.x[rd] = self.csr[csr];
+				}
+
+				self.csr[csr] = self.x[rs1];
+				Ok(inst)
+			},
+			Inst::Csrrs  { rd, rs1, csr } => {
+				self.x[rd] = self.csr[csr];
+
+				if rs1 != 0 {
+					self.csr[csr] |= self.x[rs1];
+				}
+				Ok(inst)
+			},
+			Inst::Csrrc  { rd, rs1, csr } => {
+				self.x[rd] = self.csr[csr];
+			
+				if rs1 != 0 {
+					self.csr[csr] &= !self.x[rs1];
+				}
+				Ok(inst)
+			},
+			Inst::Csrrwi { rd, uimm, csr } => {
+				if rd != 0 {
+					self.x[rd] = self.csr[csr];
+				}
+
+				self.csr[csr] = uimm;
+				Ok(inst)
+			},
+			Inst::Csrrsi { rd, uimm, csr } => {
+				self.x[rd] = self.csr[csr];
+
+				if uimm != 0 {
+					self.csr[csr] |= uimm;
+				}
+				Ok(inst)
+			},
+			Inst::Csrrci { rd, uimm, csr } => {
+				self.x[rd] = self.csr[csr];
+
+				if uimm != 0 {
+					self.csr[csr] &= !uimm;
+				}
 				Ok(inst)
 			},
 			_ => Err(Exception::InstructionNotImplemented(inst)),

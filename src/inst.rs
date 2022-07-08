@@ -71,9 +71,9 @@ pub enum Inst {
 	Csrrw  { rd: usize, rs1: usize, csr: usize },
 	Csrrs  { rd: usize, rs1: usize, csr: usize },
 	Csrrc  { rd: usize, rs1: usize, csr: usize },
-	Csrrwi { rd: usize, rs1: usize, csr: usize },
-	Csrrsi { rd: usize, rs1: usize, csr: usize },
-	Csrrci { rd: usize, rs1: usize, csr: usize },
+	Csrrwi { rd: usize, uimm: u64, csr: usize },
+	Csrrsi { rd: usize, uimm: u64, csr: usize },
+	Csrrci { rd: usize, uimm: u64, csr: usize },
 }
 
 pub enum ImmType {
@@ -149,9 +149,9 @@ impl ImmType {
 							0b001 => Ok(Inst::Csrrw  { rd, rs1, csr }),
 							0b010 => Ok(Inst::Csrrs  { rd, rs1, csr }),
 							0b011 => Ok(Inst::Csrrc  { rd, rs1, csr }),
-							0b101 => Ok(Inst::Csrrwi { rd, rs1, csr }),
-							0b110 => Ok(Inst::Csrrsi { rd, rs1, csr }),
-							0b111 => Ok(Inst::Csrrci { rd, rs1, csr }),
+							0b101 => Ok(Inst::Csrrwi { rd, uimm: rs1 as u64, csr }),
+							0b110 => Ok(Inst::Csrrsi { rd, uimm: rs1 as u64, csr }),
+							0b111 => Ok(Inst::Csrrci { rd, uimm: rs1 as u64, csr }),
 	                        _ => if func3 == 0 && rs1 == 0 && rd == 0 {
 	                            match imm {
 	                                0 => Ok(Inst::Ecall),
