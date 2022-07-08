@@ -8,11 +8,13 @@ pub struct Cpu {
     pub x: [u64; 32],
 
 	pub pc: u64,
+
+	pub csr: [u64; 4096],
 }
 
 impl Cpu {
     pub fn new() -> Self {
-        let cpu = Cpu { x: [0; 32], pc: 0 };
+        let cpu = Cpu { x: [0; 32], pc: 0, csr: [0; 4096] };
 		
 		cpu
     }
@@ -279,6 +281,11 @@ impl Cpu {
 			Inst::Fence { rd: _rd, rs1: _rs1, imm: _imm } => Ok(inst),
 			Inst::Ecall {  } => Ok(inst),
 			Inst::Ebreak {  } => Ok(inst),
+
+			// CSRs implementation
+			Inst::Csrrw { rd, rs1, csr } => {
+				Ok(inst)
+			},
 			_ => Err(Exception::InstructionNotImplemented(inst)),
 		}
     }

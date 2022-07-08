@@ -67,6 +67,13 @@ pub enum Inst {
 	Bgeu { rs1: usize, rs2: usize, imm:i64 },
 
 	Jal { rd: usize, imm: i64 },
+
+	Csrrw  { rd: usize, rs1: usize, csr: usize },
+	Csrrs  { rd: usize, rs1: usize, csr: usize },
+	Csrrc  { rd: usize, rs1: usize, csr: usize },
+	Csrrwi { rd: usize, rs1: usize, csr: usize },
+	Csrrsi { rd: usize, rs1: usize, csr: usize },
+	Csrrci { rd: usize, rs1: usize, csr: usize },
 }
 
 pub enum ImmType {
@@ -93,6 +100,9 @@ impl ImmType {
                 let shamt = imm & 0b111111;
                 // Differentiate between SRLI and SRAI
                 let shiftop = (imm * 0x400) == 0;
+
+				// CSR selector
+				let csr = imm as usize;
 
                 // Sign extend the immediate
                 let imm = ((imm as i32) << 20) >> 20;
@@ -135,15 +145,23 @@ impl ImmType {
                         _ => Err(Exception::UnknownInstruction),
                     },
                     0b1110011 => {
-                        if func3 == 0 && rs1 == 0 && rd == 0 {
-                            match imm {
-                                0 => Ok(Inst::Ecall),
-                                1 => Ok(Inst::Ebreak),
-                                _ => Err(Exception::UnknownInstruction),
-                            }
-                        } else {
-                            Err(Exception::UnknownInstruction)
-                        }
+						match func3 {
+							0b001 => Ok(Inst::Csrrw  { rd, rs1, csr }),
+							0b010 => Ok(Inst::Csrrs  { rd, rs1, csr }),
+							0b011 => Ok(Inst::Csrrc  { rd, rs1, csr }),
+							0b101 => Ok(Inst::Csrrwi { rd, rs1, csr }),
+							0b110 => Ok(Inst::Csrrsi { rd, rs1, csr }),
+							0b111 => Ok(Inst::Csrrci { rd, rs1, csr }),
+	                        _ => if func3 == 0 && rs1 == 0 && rd == 0 {
+	                            match imm {
+	                                0 => Ok(Inst::Ecall),
+	                                1 => Ok(Inst::Ebreak),
+	                                _ => Err(Exception::UnknownInstruction),
+	                            }
+	                        } else {
+	                            Err(Exception::UnknownInstruction)
+                        	} 
+						}
                     }
                     0b0011011 => match func3 {
                         0b000 => Ok(Inst::Addiw { rd, rs1, imm }),
