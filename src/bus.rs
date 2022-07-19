@@ -98,5 +98,5 @@ impl<'a> Bus<'a> {
 		} else {
         	Err(Exception::AddressOutOfBounds(addr))
 		}
-     - RAM_BASE}
+	}
 }

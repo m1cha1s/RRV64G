@@ -74,6 +74,9 @@ pub enum Inst {
 	Csrrwi { rd: usize, uimm: u64, csr: usize },
 	Csrrsi { rd: usize, uimm: u64, csr: usize },
 	Csrrci { rd: usize, uimm: u64, csr: usize },
+
+	Sret,
+	Mret,
 }
 
 pub enum ImmType {
@@ -156,6 +159,8 @@ impl ImmType {
 	                            match imm {
 	                                0 => Ok(Inst::Ecall),
 	                                1 => Ok(Inst::Ebreak),
+									258 => Ok(Inst::Sret),
+									770 => Ok(Inst::Mret),
 	                                _ => Err(Exception::UnknownInstruction),
 	                            }
 	                        } else {

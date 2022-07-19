@@ -1,7 +1,13 @@
+type Mode = u8;
+const USER: Mode = 0b00;
+const SUPERVISOR: Mode = 0b00;
+const MACHINE: Mode = 0b00;
+
 use crate::{
     bus::Bus,
     exceptions::Exception,
     inst::{Inst, ENCODING_TABLE},
+	csrs::*,
 };
 
 pub struct Cpu {
@@ -9,12 +15,14 @@ pub struct Cpu {
 
 	pub pc: u64,
 
+	pub mode: Mode,
+
 	pub csr: [u64; 4096],
 }
 
 impl Cpu {
     pub fn new() -> Self {
-        let cpu = Cpu { x: [0; 32], pc: 0, csr: [0; 4096] };
+        let cpu = Cpu { x: [0; 32], pc: 0, csr: [0; 4096], mode: MACHINE };
 		
 		cpu
     }
@@ -329,6 +337,19 @@ impl Cpu {
 				if uimm != 0 {
 					self.csr[csr] &= !uimm;
 				}
+				Ok(inst)
+			},
+			Inst::Sret => {
+				let mut sstatus = self.csr[SSTATUS];
+				self.mode = ((sstatus & MASK_SPP) >> 8) as u8;
+				let spie = (sstatus & MASK_SPIE) >> 5;
+				sstatus = (sstatus & !MASK_SIE) | (spie << 1);
+				sstatus |= MASK_SPIE;
+				sstatus &= !MASK_SPP;
+				self.csr[SSTATUS] = sstatus;
+
+				self.pc = self.csr[SEPC] & !0b11;
+
 				Ok(inst)
 			},
 			_ => Err(Exception::InstructionNotImplemented(inst)),
