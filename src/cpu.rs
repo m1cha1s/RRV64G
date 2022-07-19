@@ -352,6 +352,22 @@ impl Cpu {
 
 				Ok(inst)
 			},
+			Inst::Mret => {
+
+				let mut mstatus = self.csr[MSTATUS];
+
+				self.mode = ((mstatus & MASK_MPP) >> 11) as u8;
+				let mpie = (mstatus & MASK_MPIE) >> 7;
+				mstatus = (mstatus & !MASK_MIE) | (mpie << 3);
+				mstatus |= MASK_MPIE;
+				mstatus &= !MASK_MPP;
+				mstatus &= !MASK_MPRV;
+				self.csr[MSTATUS] = mstatus;
+
+				self.pc = self.csr[MEPC] & !0b11;
+				
+				Ok(inst)
+			},
 			_ => Err(Exception::InstructionNotImplemented(inst)),
 		}
     }

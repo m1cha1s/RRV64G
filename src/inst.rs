@@ -2,6 +2,7 @@ use crate::prelude::Exception;
 
 #[derive(Debug)]
 pub enum Inst {
+	// RV64I instuctions
     Addi  { rd: usize, rs1: usize, imm: i64 },
     Slti  { rd: usize, rs1: usize, imm: i64 },
     Sltiu { rd: usize, rs1: usize, imm: i64 },
@@ -68,6 +69,7 @@ pub enum Inst {
 
 	Jal { rd: usize, imm: i64 },
 
+	// Zicsr extension
 	Csrrw  { rd: usize, rs1: usize, csr: usize },
 	Csrrs  { rd: usize, rs1: usize, csr: usize },
 	Csrrc  { rd: usize, rs1: usize, csr: usize },
@@ -75,6 +77,7 @@ pub enum Inst {
 	Csrrsi { rd: usize, uimm: u64, csr: usize },
 	Csrrci { rd: usize, uimm: u64, csr: usize },
 
+	// Privilaged mode instuction
 	Sret,
 	Mret,
 }
