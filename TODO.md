@@ -1,5 +1,7 @@
 # TODO
 
+# **OUTDATED**
+
 ## CPU internals
 - [ ] Interrupt handling
 

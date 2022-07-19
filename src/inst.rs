@@ -60,14 +60,56 @@ pub enum Inst {
     Srlw { rd: usize, rs1: usize, rs2: usize },
     Sraw { rd: usize, rs1: usize, rs2: usize },
 
-	Beq  { rs1: usize, rs2: usize, imm:i64 },
-	Bne  { rs1: usize, rs2: usize, imm:i64 },
-	Blt  { rs1: usize, rs2: usize, imm:i64 },
-	Bge  { rs1: usize, rs2: usize, imm:i64 },
-	Bltu { rs1: usize, rs2: usize, imm:i64 },
-	Bgeu { rs1: usize, rs2: usize, imm:i64 },
+	Beq  { rs1: usize, rs2: usize, imm: i64 },
+	Bne  { rs1: usize, rs2: usize, imm: i64 },
+	Blt  { rs1: usize, rs2: usize, imm: i64 },
+	Bge  { rs1: usize, rs2: usize, imm: i64 },
+	Bltu { rs1: usize, rs2: usize, imm: i64 },
+	Bgeu { rs1: usize, rs2: usize, imm: i64 },
 
 	Jal { rd: usize, imm: i64 },
+
+	// M extension
+	Mul { rd: usize, rs1: usize, rs2: usize },
+	Mulh { rd: usize, rs1: usize, rs2: usize },
+	Mulw { rd: usize, rs1: usize, rs2: usize },
+	Mulhsu { rd: usize, rs1: usize, rs2: usize },
+	Mulhu { rd: usize, rs1: usize, rs2: usize },
+	Div { rd: usize, rs1: usize, rs2: usize },
+	Divw { rd: usize, rs1: usize, rs2: usize },
+	Divu { rd: usize, rs1: usize, rs2: usize },
+	Divuw { rd: usize, rs1: usize, rs2: usize },
+	Rem { rd: usize, rs1: usize, rs2: usize },
+	Remw { rd: usize, rs1: usize, rs2: usize },
+	Remu { rd: usize, rs1: usize, rs2: usize },
+	Remuw { rd: usize, rs1: usize, rs2: usize },
+
+	// A extension
+	Lrw { rd: usize, rs1: usize, rl: bool, aq: bool },
+	Lrd { rd: usize, rs1: usize, rl: bool, aq: bool },
+	Scw { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Scd { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amoswapw { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amoswapd { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amoaddw { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amoaddd { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amoxorw { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amoxord { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amoandw { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amoandd { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amoorw { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amoord { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amominw { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amomind { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amomaxw { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amominuw { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amominud { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amomaxuw { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amomaxud { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+
+	// F extension
+	
+	// D extension
 
 	// Zicsr extension
 	Csrrw  { rd: usize, rs1: usize, csr: usize },
@@ -76,6 +118,9 @@ pub enum Inst {
 	Csrrwi { rd: usize, uimm: u64, csr: usize },
 	Csrrsi { rd: usize, uimm: u64, csr: usize },
 	Csrrci { rd: usize, uimm: u64, csr: usize },
+
+	// Zifencei extension
+	Fencei { rd: usize, rs1: usize, imm: i64 },
 
 	// Privilaged mode instuction
 	Sret,
