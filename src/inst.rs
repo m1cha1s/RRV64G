@@ -107,10 +107,12 @@ pub enum Inst {
 	Amomaxuw { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
 	Amomaxud { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
 
+	// TODO
 	// F extension
 	Flw { rd: usize, rs1: usize, imm: i64 }, 
 	Fsw { rs1: usize, rs2: usize, imm: i64 },
 	
+	// TODO
 	// D extension
 
 	// Zicsr extension
@@ -275,31 +277,38 @@ impl ImmType {
                 let func7 = (inst >> 25) & 0b1111111;
 
                 match opcode {
-                    0b0110011 => match func3 {
-						0b000 => if func7==0 { 
-								Ok(Inst::Add { rd, rs1, rs2 }) 
-							} else { 
-								Ok(Inst::Sub { rd, rs1, rs2 }) 
-							},
-						0b001 => Ok(Inst::Sll { rd, rs1 ,rs2 }),
-						0b010 => Ok(Inst::Slt { rd, rs1 ,rs2 }),
-						0b011 => Ok(Inst::Sltu { rd, rs1 ,rs2 }),
-						0b100 => Ok(Inst::Xor { rd, rs1 ,rs2 }),
-						0b101 => if func7==0 {
-							Ok(Inst::Srl { rd, rs1, rs2 })
-						} else {
-							Ok(Inst::Sra { rd, rs1, rs2 })
-						},
-						0b110 => Ok(Inst::Or { rd, rs1, rs2 }),
-						0b111 => Ok(Inst::And { rd, rs1, rs2 }),
-                    	_ => Err(Exception::UnknownInstruction),
+                    0b0110011 => match (func3, func7) {
+						(0b000, 0b0000000) => Ok(Inst::Add    { rd, rs1, rs2 }),
+						(0b000, 0b0100000) => Ok(Inst::Sub    { rd, rs1, rs2 }),
+						(0b001, 0b0000000) => Ok(Inst::Sll    { rd, rs1 ,rs2 }),
+						(0b010, 0b0000000) => Ok(Inst::Slt    { rd, rs1 ,rs2 }),
+						(0b011, 0b0000000) => Ok(Inst::Sltu   { rd, rs1 ,rs2 }),
+						(0b100, 0b0000000) => Ok(Inst::Xor    { rd, rs1 ,rs2 }),
+						(0b101, 0b0000000) => Ok(Inst::Srl    { rd, rs1, rs2 }),
+						(0b101, 0b0100000) => Ok(Inst::Sra    { rd, rs1, rs2 }),
+						(0b110, 0b0000000) => Ok(Inst::Or     { rd, rs1, rs2 }),
+						(0b111, 0b0000000) => Ok(Inst::And    { rd, rs1, rs2 }),
+						(0b000, 0b0000001) => Ok(Inst::Mul    { rd, rs1, rs2 }),
+						(0b001, 0b0000001) => Ok(Inst::Mulh   { rd, rs1, rs2 }),
+						(0b010, 0b0000001) => Ok(Inst::Mulhsu { rd, rs1, rs2 }),
+						(0b011, 0b0000001) => Ok(Inst::Mulhu  { rd, rs1, rs2 }),
+						(0b100, 0b0000001) => Ok(Inst::Div    { rd, rs1, rs2 }),
+						(0b101, 0b0000001) => Ok(Inst::Divu   { rd, rs1, rs2 }),
+						(0b110, 0b0000001) => Ok(Inst::Rem    { rd, rs1, rs2 }),
+						(0b111, 0b0000001) => Ok(Inst::Remu   { rd, rs1, rs2 }),
+                    	(_, _) => Err(Exception::UnknownInstruction),
 				    },
-					0b0111011 => match (func7, func3) {
-						(0b0000000, 0b000) => Ok(Inst::Addw { rd, rs1, rs2 }),
-						(0b0100000, 0b000) => Ok(Inst::Subw { rd, rs1, rs2 }),
-						(0b0000000, 0b001) => Ok(Inst::Sllw { rd, rs1, rs2 }),
-						(0b0000000, 0b101) => Ok(Inst::Srlw { rd, rs1, rs2 }),
-						(0b0100000, 0b101) => Ok(Inst::Sraw { rd, rs1, rs2 }),
+					0b0111011 => match (func3, func7) {
+						(0b000, 0b0000000) => Ok(Inst::Addw { rd, rs1, rs2 }),
+						(0b000, 0b0100000) => Ok(Inst::Subw { rd, rs1, rs2 }),
+						(0b001, 0b0000000) => Ok(Inst::Sllw { rd, rs1, rs2 }),
+						(0b101, 0b0000000) => Ok(Inst::Srlw { rd, rs1, rs2 }),
+						(0b101, 0b0100000) => Ok(Inst::Sraw { rd, rs1, rs2 }),
+						(0b000, 0b0000001) => Ok(Inst::Mulw { rd, rs1, rs2 }),
+						(0b100, 0b0000001) => Ok(Inst::Divw { rd, rs1, rs2 }),
+						(0b101, 0b0000001) => Ok(Inst::Divuw { rd, rs1, rs2 }),
+						(0b110, 0b0000001) => Ok(Inst::Remw { rd, rs1, rs2 }),
+						(0b111, 0b0000001) => Ok(Inst::Remuw { rd, rs1, rs2 }),
                     	(_, _) => Err(Exception::UnknownInstruction),
 					},
                     _ => Err(Exception::UnknownInstruction),
