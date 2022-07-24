@@ -102,6 +102,7 @@ pub enum Inst {
 	Amominw  { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
 	Amomind  { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
 	Amomaxw  { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
+	Amomaxd  { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
 	Amominuw { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
 	Amominud { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
 	Amomaxuw { rd: usize, rs1: usize, rs2: usize, rl: bool, aq: bool },
@@ -276,6 +277,10 @@ impl ImmType {
                 let rs2 = ((inst >> 20) & 0b11111) as usize;
                 let func7 = (inst >> 25) & 0b1111111;
 
+				// A extension
+				let rl = (func7 & 0b1) != 0;
+				let aq = ((func7 & 0b10) >> 1) != 0;
+
                 match opcode {
                     0b0110011 => match (func3, func7) {
 						(0b000, 0b0000000) => Ok(Inst::Add    { rd, rs1, rs2 }),
@@ -310,6 +315,31 @@ impl ImmType {
 						(0b110, 0b0000001) => Ok(Inst::Remw { rd, rs1, rs2 }),
 						(0b111, 0b0000001) => Ok(Inst::Remuw { rd, rs1, rs2 }),
                     	(_, _) => Err(Exception::UnknownInstruction),
+					},
+					0b0101111 => match (func3, func7>>2) {
+						(0b010, 0b00010) => Ok(Inst::Lrw { rd, rs1, rl, aq }),
+						(0b011, 0b00010) => Ok(Inst::Lrd { rd, rs1, rl, aq }),
+						(0b010, 0b00011) => Ok(Inst::Scw { rd, rs1, rs2, rl, aq }),
+						(0b011, 0b00011) => Ok(Inst::Scd { rd, rs1, rs2, rl, aq }),
+						(0b010, 0b00001) => Ok(Inst::Amoswapw { rd, rs1, rs2, rl, aq }),
+						(0b011, 0b00001) => Ok(Inst::Amoswapd { rd, rs1, rs2, rl, aq }),
+						(0b010, 0b00000) => Ok(Inst::Amoaddw { rd, rs1, rs2, rl, aq }),
+						(0b011, 0b00000) => Ok(Inst::Amoaddd { rd, rs1, rs2, rl, aq }),
+						(0b010, 0b00100) => Ok(Inst::Amoxorw { rd, rs1, rs2, rl, aq }),
+						(0b011, 0b00100) => Ok(Inst::Amoxord { rd, rs1, rs2, rl, aq }),
+						(0b010, 0b01100) => Ok(Inst::Amoandw { rd, rs1, rs2, rl, aq }),
+						(0b011, 0b01100) => Ok(Inst::Amoandd { rd, rs1, rs2, rl, aq }),
+						(0b010, 0b01000) => Ok(Inst::Amoorw { rd, rs1, rs2, rl, aq }),
+						(0b011, 0b01000) => Ok(Inst::Amoord { rd, rs1, rs2, rl, aq }),
+						(0b010, 0b10000) => Ok(Inst::Amominw { rd, rs1, rs2, rl, aq }),
+						(0b011, 0b10000) => Ok(Inst::Amomind { rd, rs1, rs2, rl, aq }),
+						(0b010, 0b10100) => Ok(Inst::Amomaxw { rd, rs1, rs2, rl, aq }),
+						(0b011, 0b10100) => Ok(Inst::Amomaxd { rd, rs1, rs2, rl, aq }),
+						(0b010, 0b11000) => Ok(Inst::Amominuw { rd, rs1, rs2, rl, aq }),
+						(0b011, 0b11000) => Ok(Inst::Amominud { rd, rs1, rs2, rl, aq }),
+						(0b010, 0b11100) => Ok(Inst::Amomaxuw { rd, rs1, rs2, rl, aq }),
+						(0b011, 0b11100) => Ok(Inst::Amomaxud { rd, rs1, rs2, rl, aq }),
+						(_, _) => Err(Exception::UnknownInstruction),
 					},
                     _ => Err(Exception::UnknownInstruction),
                 }
@@ -420,7 +450,7 @@ pub const ENCODING_TABLE: [Option<ImmType>; 128] = [
     /* 0b0101100 */ None,
     /* 0b0101101 */ None,
     /* 0b0101110 */ None,
-    /* 0b0101111 */ None,
+    /* 0b0101111 */ Some(ImmType::R),
     /* 0b0110000 */ None,
     /* 0b0110001 */ None,
     /* 0b0110010 */ None,
