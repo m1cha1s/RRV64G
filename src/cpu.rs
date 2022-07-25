@@ -1,4 +1,4 @@
-type Mode = u8;
+type Mode = u64;
 const USER: Mode = 0b00;
 const SUPERVISOR: Mode = 0b00;
 const MACHINE: Mode = 0b00;
@@ -51,7 +51,37 @@ impl Cpu {
         let cause = e.code();
 
         // TODO: Stopped here in development
-        let trap_in_s_mode = mode <= SUPERVISOR;
+        let trap_in_s_mode =
+            mode <= SUPERVISOR && (self.csr[MEDELEG].wrapping_shr(cause as u32) & 1) == 1;
+        let (STATUS, TVEC, CAUSE, TVAL, EPC, MASK_PIE, pie_i, MASK_IE, ie_i, MASK_PP, pp_i) =
+            if trap_in_s_mode {
+                self.mode = SUPERVISOR;
+                (
+                    SSTATUS, STVEC, SCAUSE, STVAL, SEPC, MASK_SPIE, 5, MASK_SIE, 1, MASK_SPP, 8,
+                )
+            } else {
+                self.mode = MACHINE;
+                (
+                    MSTATUS, MTVEC, MCAUSE, MTVAL, MEPC, MASK_MPIE, 7, MASK_MIE, 3, MASK_MPP, 11,
+                )
+            };
+
+        self.pc = self.csr[TVEC] & !0b11;
+
+        self.csr[EPC] = pc;
+
+        self.csr[CAUSE] = cause;
+
+        self.csr[TVAL] = e.value();
+
+        let mut status = self.csr[STATUS];
+        let ie = (status & MASK_IE) >> ie_i;
+
+        status = (status & !MASK_PIE) | (ie << pie_i);
+        status &= !MASK_IE;
+        status = (status & !MASK_PP) | (mode << pp_i);
+
+        self.csr[STATUS] = status;
     }
 
     fn fetch(&mut self, bus: &mut Bus) -> Result<u32, Exception> {
@@ -371,7 +401,7 @@ impl Cpu {
             }
             Inst::Sret => {
                 let mut sstatus = self.csr[SSTATUS];
-                self.mode = ((sstatus & MASK_SPP) >> 8) as u8;
+                self.mode = (sstatus & MASK_SPP) >> 8;
                 let spie = (sstatus & MASK_SPIE) >> 5;
                 sstatus = (sstatus & !MASK_SIE) | (spie << 1);
                 sstatus |= MASK_SPIE;
@@ -385,7 +415,7 @@ impl Cpu {
             Inst::Mret => {
                 let mut mstatus = self.csr[MSTATUS];
 
-                self.mode = ((mstatus & MASK_MPP) >> 11) as u8;
+                self.mode = (mstatus & MASK_MPP) >> 11;
                 let mpie = (mstatus & MASK_MPIE) >> 7;
                 mstatus = (mstatus & !MASK_MIE) | (mpie << 3);
                 mstatus |= MASK_MPIE;
