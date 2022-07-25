@@ -4,15 +4,17 @@ extern crate alloc;
 
 pub mod bus;
 pub mod cpu;
+pub mod csrs;
 pub mod exceptions;
 pub mod inst;
+pub mod plic;
 pub mod vm;
-pub mod csrs;
 
 pub mod prelude {
     pub use super::bus::*;
     pub use super::cpu::*;
+    pub use super::csrs::*;
     pub use super::exceptions::*;
-	pub use super::vm::*;
-	pub use super::csrs::*;
+    pub use super::plic::*;
+    pub use super::vm::*;
 }
