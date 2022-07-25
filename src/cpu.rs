@@ -368,6 +368,77 @@ impl Cpu {
 				
 				Ok(inst)
 			},
+			Inst::Mul { rd, rs1, rs2 } => {
+
+				self.x[rd] = self.x[rs1].wrapping_mul(self.x[rs2]);
+
+				Ok(inst)
+			},	
+			Inst::Div { rd, rs1, rs2 } => {
+	
+				self.x[rd] = self.x[rs1].wrapping_div(self.x[rs2]);
+
+				Ok(inst)
+			},
+			Inst::Divu { rd, rs1, rs2 } => {
+				
+				self.x[rd] = match self.x[rs2] {
+					0 => 0xffff_ffff_ffff_ffff,
+					_ => {
+						let dividend = self.x[rs1];
+						let divisor  = self.x[rs2];
+
+						dividend.wrapping_div(divisor)
+					}
+				};
+
+				Ok(inst)
+			},
+			Inst::Remuw { rd, rs1, rs2 } => {
+				
+				self.x[rd] = match self.x[rs2] {
+					0 => self.x[rs1],
+					_ => {
+						let dividend = self.x[rs1] as u32;
+						let divisor  = self.x[rs2] as u32;
+						dividend.wrapping_rem(divisor) as i32 as u64
+					},
+				};
+
+				Ok(inst)
+			},
+			Inst::Amoaddw { rd, rs1, rs2, aq: _aq, rl: _rl } => {
+				
+				let t = bus.load32(self.x[rs1])? as u64;
+				bus.store32(self.x[rs1], t.wrapping_add(self.x[rs2]) as u32)?;
+				self.x[rd] = t;
+
+				Ok(inst)
+			},
+			Inst::Amoaddd { rd, rs1, rs2, aq: _aq, rl: _rl } => {
+				
+				let t = bus.load64(self.x[rs1])?;
+				bus.store64(self.x[rs1], t.wrapping_add(self.x[rs2]))?;
+				self.x[rd] = t;
+
+				Ok(inst)
+			},
+			Inst::Amoswapw { rd, rs1, rs2, aq: _aq, rl: _rl } => {
+				
+				let t = bus.load32(self.x[rs1])?;
+				bus.store32(self.x[rs1], self.x[rs2] as u32)?;
+				self.x[rd] = t as u64;
+
+				Ok(inst)
+			},
+			Inst::Amoswapd { rd, rs1, rs2, aq: _aq, rl: _rl } => {
+				
+				let t = bus.load64(self.x[rs1])?;
+				bus.store64(self.x[rs1], self.x[rs2])?;
+				self.x[rd] = t;
+
+				Ok(inst)
+			},
 			_ => Err(Exception::InstructionNotImplemented(inst)),
 		}
     }
