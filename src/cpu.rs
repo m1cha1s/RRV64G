@@ -52,7 +52,7 @@ impl Cpu {
         if let Some(typ) = &ENCODING_TABLE[opcode as usize] {
             typ.decode(inst)
         } else {
-            Err(Exception::UnknownInstruction)
+            Err(Exception::IllegalInstruction(pc))
         }
     }
 

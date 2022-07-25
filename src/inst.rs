@@ -175,11 +175,11 @@ impl ImmType {
                         0b101 => Ok(Inst::Lhu { rd, rs1, imm }),
                         0b110 => Ok(Inst::Lwu { rd, rs1, imm }),
                         0b011 => Ok(Inst::Ld { rd, rs1, imm }),
-                        _ => Err(Exception::UnknownInstruction),
+                        _ => Err(Exception::IllegalInstruction(inst as u64)),
                     },
                     0b0001111 => match func3 {
                         0b000 => Ok(Inst::Fence { rd, rs1, imm }),
-                        _ => Err(Exception::UnknownInstruction),
+                        _ => Err(Exception::IllegalInstruction(inst as u64)),
                     },
                     0b0010011 => match func3 {
                         0b000 => Ok(Inst::Addi { rd, rs1, imm }),
@@ -196,11 +196,11 @@ impl ImmType {
                                 Ok(Inst::Srai { rd, rs1, shamt })
                             }
                         }
-                        _ => Err(Exception::UnknownInstruction),
+                        _ => Err(Exception::IllegalInstruction(inst as u64)),
                     },
                     0b1100111 => match func3 {
                         0b000 => Ok(Inst::Jalr { rd, rs1, imm: imm }),
-                        _ => Err(Exception::UnknownInstruction),
+                        _ => Err(Exception::IllegalInstruction(inst as u64)),
                     },
                     0b1110011 => {
 						match func3 {
@@ -217,10 +217,10 @@ impl ImmType {
 	                                1 => Ok(Inst::Ebreak),
 									258 => Ok(Inst::Sret),
 									770 => Ok(Inst::Mret),
-	                                _ => Err(Exception::UnknownInstruction),
+	                                _ => Err(Exception::IllegalInstruction(inst as u64)),
 	                            }
 	                        } else {
-	                            Err(Exception::UnknownInstruction)
+	                            Err(Exception::IllegalInstruction(inst as u64))
                         	} 
 						}
                     }
@@ -232,9 +232,9 @@ impl ImmType {
                         } else {
                             Ok(Inst::Sraiw { rd, rs1, shamt })
                         },
-                        _ => Err(Exception::UnknownInstruction),
+                        _ => Err(Exception::IllegalInstruction(inst as u64)),
                     },
-                    _ => Err(Exception::UnknownInstruction),
+                    _ => Err(Exception::IllegalInstruction(inst as u64)),
                 }
             }
             ImmType::U => {
@@ -245,7 +245,7 @@ impl ImmType {
                 match opcode {
                     0b0010111 => Ok(Inst::Auipc { rd, imm }),
                     0b0110111 => Ok(Inst::Lui { rd, imm }),
-                    _ => Err(Exception::UnknownInstruction),
+                    _ => Err(Exception::IllegalInstruction(inst as u64)),
                 }   
             },
             ImmType::S => {
@@ -268,9 +268,9 @@ impl ImmType {
                         0b001 => Ok(Inst::Sh { rs1, rs2, imm }),
                         0b010 => Ok(Inst::Sw { rs1, rs2, imm }),
                         0b011 => Ok(Inst::Sd { rs1, rs2, imm }),
-                        _ => Err(Exception::UnknownInstruction),
+                        _ => Err(Exception::IllegalInstruction(inst as u64)),
                     },
-                    _ => Err(Exception::UnknownInstruction),
+                    _ => Err(Exception::IllegalInstruction(inst as u64)),
                 }
             },
             ImmType::R => {
@@ -304,7 +304,7 @@ impl ImmType {
 						(0b101, 0b0000001) => Ok(Inst::Divu   { rd, rs1, rs2 }),
 						(0b110, 0b0000001) => Ok(Inst::Rem    { rd, rs1, rs2 }),
 						(0b111, 0b0000001) => Ok(Inst::Remu   { rd, rs1, rs2 }),
-                    	(_, _) => Err(Exception::UnknownInstruction),
+                    	(_, _) => Err(Exception::IllegalInstruction(inst as u64)),
 				    },
 					0b0111011 => match (func3, func7) {
 						(0b000, 0b0000000) => Ok(Inst::Addw { rd, rs1, rs2 }),
@@ -317,7 +317,7 @@ impl ImmType {
 						(0b101, 0b0000001) => Ok(Inst::Divuw { rd, rs1, rs2 }),
 						(0b110, 0b0000001) => Ok(Inst::Remw { rd, rs1, rs2 }),
 						(0b111, 0b0000001) => Ok(Inst::Remuw { rd, rs1, rs2 }),
-                    	(_, _) => Err(Exception::UnknownInstruction),
+                    	(_, _) => Err(Exception::IllegalInstruction(inst as u64)),
 					},
 					0b0101111 => match (func3, func7>>2) {
 						(0b010, 0b00010) => Ok(Inst::Lrw { rd, rs1, rl, aq }),
@@ -342,9 +342,9 @@ impl ImmType {
 						(0b011, 0b11000) => Ok(Inst::Amominud { rd, rs1, rs2, rl, aq }),
 						(0b010, 0b11100) => Ok(Inst::Amomaxuw { rd, rs1, rs2, rl, aq }),
 						(0b011, 0b11100) => Ok(Inst::Amomaxud { rd, rs1, rs2, rl, aq }),
-						(_, _) => Err(Exception::UnknownInstruction),
+						(_, _) => Err(Exception::IllegalInstruction(inst as u64)),
 					},
-                    _ => Err(Exception::UnknownInstruction),
+                    _ => Err(Exception::IllegalInstruction(inst as u64)),
                 }
             },
 			ImmType::B => {
@@ -376,7 +376,7 @@ impl ImmType {
 					0b101 => Ok(Inst::Bge { rs1, rs2, imm: imm }),
 					0b110 => Ok(Inst::Bltu { rs1, rs2, imm: imm }),
 					0b111 => Ok(Inst::Bgeu { rs1, rs2, imm: imm }),
-            		_ => Err(Exception::UnknownInstruction),
+            		_ => Err(Exception::IllegalInstruction(inst as u64)),
 				}
 			},
 			ImmType::J => {
@@ -398,7 +398,7 @@ impl ImmType {
 
 				match opcode {
 					0b1101111 => Ok(Inst::Jal { rd, imm }),
-            		_ => Err(Exception::UnknownInstruction),
+            		_ => Err(Exception::IllegalInstruction(inst as u64)),
 				}
 			},
         }

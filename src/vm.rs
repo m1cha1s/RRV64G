@@ -19,7 +19,7 @@ impl<'a> VM<'a> {
 		self.cpu.tick(&mut self.bus)?;
 
 		if self.cpu.pc == 0 {
-			Err(Exception::VMExit)
+			Err(Exception::Breakpoint(self.cpu.pc))
 		} else {
 			Ok(())
 		}
