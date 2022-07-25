@@ -26,7 +26,7 @@ impl<'a> Bus<'a> {
 		if addr >= RAM_BASE && addr < (RAM_BASE + self.ram_size) {
 			Ok((self.ram.load(addr - RAM_BASE)? & 0xff) as u8)
 		} else {
-        	Err(Exception::AddressOutOfBounds(addr))
+        	Err(Exception::Breakpoint(addr))
 		}
     }
 
@@ -34,7 +34,7 @@ impl<'a> Bus<'a> {
 		if addr >= RAM_BASE && addr < (RAM_BASE + self.ram_size) {
 			Ok((self.ram.load(addr - RAM_BASE)? & 0xffff) as u16)
 		} else {
-        	Err(Exception::AddressOutOfBounds(addr))
+        	Err(Exception::Breakpoint(addr))
 		}
     }
 
@@ -42,7 +42,7 @@ impl<'a> Bus<'a> {
 		if addr >= RAM_BASE && addr < (RAM_BASE + self.ram_size) {
 			self.ram.load(addr - RAM_BASE)
 		} else {
-        	Err(Exception::AddressOutOfBounds(addr))
+        	Err(Exception::Breakpoint(addr))
 		}
     }
 
@@ -51,7 +51,7 @@ impl<'a> Bus<'a> {
 			Ok(self.ram.load(addr - RAM_BASE)? as u64 
 				| (self.ram.load(addr - RAM_BASE + 1)? as u64) << 32)
 		} else {
-        	Err(Exception::AddressOutOfBounds(addr))
+        	Err(Exception::Breakpoint(addr))
 		}
     }
 
@@ -63,7 +63,7 @@ impl<'a> Bus<'a> {
 
 			Ok(())
 		} else {
-        	Err(Exception::AddressOutOfBounds(addr))
+        	Err(Exception::Breakpoint(addr))
 		}
     }
 
@@ -75,7 +75,7 @@ impl<'a> Bus<'a> {
 
 			Ok(())
 		} else {
-        	Err(Exception::AddressOutOfBounds(addr))
+        	Err(Exception::Breakpoint(addr))
 		}
     }
 
@@ -85,7 +85,7 @@ impl<'a> Bus<'a> {
 
 			Ok(())
 		} else {
-        	Err(Exception::AddressOutOfBounds(addr))
+        	Err(Exception::Breakpoint(addr))
 		}
     }
 
@@ -96,7 +96,7 @@ impl<'a> Bus<'a> {
 
 			Ok(())
 		} else {
-        	Err(Exception::AddressOutOfBounds(addr))
+        	Err(Exception::Breakpoint(addr))
 		}
 	}
 }

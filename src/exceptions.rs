@@ -21,7 +21,7 @@ pub enum Exception {
 impl Exception {
 	
 	pub fn value(self) -> u64 {
-		match self -> {
+		match self {
 			Exception::InstructionAddrMisalignment(addr) => addr,
 			Exception::InstructionAccessFault(addr) => addr,
 			Exception::IllegalInstruction(inst) => inst,
@@ -60,7 +60,7 @@ impl Exception {
 
 	pub fn is_fatal(self) -> bool {
 		match self {
-			Exception::InstructionAddrMisaligned(_)
+			Exception::InstructionAddrMisalignment(_)
 			| Exception::InstructionAccessFault(_)
 			| Exception::LoadAccessFault(_)
 			| Exception::StoreAMOAddrMisaligned(_)

@@ -40,6 +40,15 @@ impl Cpu {
         self
     }
 
+	pub fn handle_exception(&mut self, e: Exception) {
+		let pc = self.pc;
+		let mode = self.mode;
+		let cause = e.code();
+
+		// TODO: Stopped here in development
+		let trap_in_s_mode = mode <= Supervisor;
+	}
+
     fn fetch(&mut self, bus: &mut Bus) -> Result<u32, Exception> {
         let inst = bus.load32(self.pc)?;
 		self.pc += 4;
@@ -52,7 +61,7 @@ impl Cpu {
         if let Some(typ) = &ENCODING_TABLE[opcode as usize] {
             typ.decode(inst)
         } else {
-            Err(Exception::IllegalInstruction(pc))
+            Err(Exception::IllegalInstruction(inst.into()))
         }
     }
 
@@ -440,7 +449,7 @@ impl Cpu {
 
 				Ok(inst)
 			},
-			_ => Err(Exception::InstructionNotImplemented(inst)),
+			_ => Err(Exception::Breakpoint(self.pc)),
 		}
     }
 }
