@@ -85,7 +85,7 @@ impl Cpu {
     }
 
     fn fetch(&mut self, bus: &mut Bus) -> Result<u32, Exception> {
-        let inst = bus.load32(self.pc)?;
+        let inst = bus.load(self.pc, 32)? as u32;
         self.pc += 4;
         Ok(inst)
     }
@@ -287,57 +287,61 @@ impl Cpu {
                 Ok(inst)
             }
             Inst::Ld { rd, rs1, imm } => {
-                self.x[rd] = bus.load64((self.x[rs1]).wrapping_add(imm as u64))?;
+                self.x[rd] = bus.load((self.x[rs1]).wrapping_add(imm as u64), 64)?;
                 Ok(inst)
             }
             Inst::Lw { rd, rs1, imm } => {
                 self.x[rd] =
-                    bus.load32((self.x[rs1]).wrapping_add(imm as u64))? as i32 as i64 as u64;
+                    bus.load((self.x[rs1]).wrapping_add(imm as u64), 32)? as i32 as i64 as u64;
                 Ok(inst)
             }
             Inst::Lwu { rd, rs1, imm } => {
-                self.x[rd] = bus.load32((self.x[rs1]).wrapping_add(imm as u64))? as u64;
+                self.x[rd] = bus.load((self.x[rs1]).wrapping_add(imm as u64), 32)? as u64;
                 Ok(inst)
             }
             Inst::Lh { rd, rs1, imm } => {
                 self.x[rd] =
-                    bus.load16((self.x[rs1]).wrapping_add(imm as u64))? as i16 as i64 as u64;
+                    bus.load((self.x[rs1]).wrapping_add(imm as u64), 16)? as i16 as i64 as u64;
                 Ok(inst)
             }
             Inst::Lhu { rd, rs1, imm } => {
-                self.x[rd] = bus.load16((self.x[rs1]).wrapping_add(imm as u64))? as u64;
+                self.x[rd] = bus.load((self.x[rs1]).wrapping_add(imm as u64), 16)? as u64;
                 Ok(inst)
             }
             Inst::Lb { rd, rs1, imm } => {
-                self.x[rd] = bus.load8((self.x[rs1]).wrapping_add(imm as u64))? as i8 as i64 as u64;
+                self.x[rd] =
+                    bus.load((self.x[rs1]).wrapping_add(imm as u64), 8)? as i8 as i64 as u64;
                 Ok(inst)
             }
             Inst::Lbu { rd, rs1, imm } => {
-                self.x[rd] = bus.load8((self.x[rs1]).wrapping_add(imm as u64))? as u64;
+                self.x[rd] = bus.load((self.x[rs1]).wrapping_add(imm as u64), 8)? as u64;
                 Ok(inst)
             }
             Inst::Sd { rs1, rs2, imm } => {
-                bus.store64((self.x[rs1]).wrapping_add(imm as u64), self.x[rs2])?;
+                bus.store((self.x[rs1]).wrapping_add(imm as u64), self.x[rs2], 64)?;
                 Ok(inst)
             }
             Inst::Sw { rs1, rs2, imm } => {
-                bus.store32(
+                bus.store(
                     (self.x[rs1]).wrapping_add(imm as u64),
-                    (self.x[rs2] & 0xffffffff) as u32,
+                    (self.x[rs2] & 0xffffffff),
+                    32,
                 )?;
                 Ok(inst)
             }
             Inst::Sh { rs1, rs2, imm } => {
-                bus.store16(
+                bus.store(
                     (self.x[rs1]).wrapping_add(imm as u64),
-                    (self.x[rs2] & 0xffff) as u16,
+                    (self.x[rs2] & 0xffff),
+                    16,
                 )?;
                 Ok(inst)
             }
             Inst::Sb { rs1, rs2, imm } => {
-                bus.store8(
+                bus.store(
                     (self.x[rs1]).wrapping_add(imm as u64),
-                    (self.x[rs2] & 0xff) as u8,
+                    (self.x[rs2] & 0xff),
+                    8,
                 )?;
                 Ok(inst)
             }
@@ -469,8 +473,8 @@ impl Cpu {
                 aq: _aq,
                 rl: _rl,
             } => {
-                let t = bus.load32(self.x[rs1])? as u64;
-                bus.store32(self.x[rs1], t.wrapping_add(self.x[rs2]) as u32)?;
+                let t = bus.load(self.x[rs1], 32)? as u64;
+                bus.store(self.x[rs1], t.wrapping_add(self.x[rs2]), 32)?;
                 self.x[rd] = t;
 
                 Ok(inst)
@@ -482,8 +486,8 @@ impl Cpu {
                 aq: _aq,
                 rl: _rl,
             } => {
-                let t = bus.load64(self.x[rs1])?;
-                bus.store64(self.x[rs1], t.wrapping_add(self.x[rs2]))?;
+                let t = bus.load(self.x[rs1], 64)?;
+                bus.store(self.x[rs1], t.wrapping_add(self.x[rs2]), 64)?;
                 self.x[rd] = t;
 
                 Ok(inst)
@@ -495,8 +499,8 @@ impl Cpu {
                 aq: _aq,
                 rl: _rl,
             } => {
-                let t = bus.load32(self.x[rs1])?;
-                bus.store32(self.x[rs1], self.x[rs2] as u32)?;
+                let t = bus.load(self.x[rs1], 32)?;
+                bus.store(self.x[rs1], self.x[rs2], 32)?;
                 self.x[rd] = t as u64;
 
                 Ok(inst)
@@ -508,8 +512,8 @@ impl Cpu {
                 aq: _aq,
                 rl: _rl,
             } => {
-                let t = bus.load64(self.x[rs1])?;
-                bus.store64(self.x[rs1], self.x[rs2])?;
+                let t = bus.load(self.x[rs1], 64)?;
+                bus.store(self.x[rs1], self.x[rs2], 64)?;
                 self.x[rd] = t;
 
                 Ok(inst)
