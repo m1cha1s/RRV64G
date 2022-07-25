@@ -130,6 +130,8 @@ pub enum Inst {
 	// Privilaged mode instuction
 	Sret,
 	Mret,
+
+	Sfencevma,
 }
 
 pub enum ImmType {
@@ -202,12 +204,13 @@ impl ImmType {
                     },
                     0b1110011 => {
 						match func3 {
-							0b001 => Ok(Inst::Csrrw  { rd, rs1, csr }),
-							0b010 => Ok(Inst::Csrrs  { rd, rs1, csr }),
-							0b011 => Ok(Inst::Csrrc  { rd, rs1, csr }),
-							0b101 => Ok(Inst::Csrrwi { rd, uimm: rs1 as u64, csr }),
-							0b110 => Ok(Inst::Csrrsi { rd, uimm: rs1 as u64, csr }),
-							0b111 => Ok(Inst::Csrrci { rd, uimm: rs1 as u64, csr }),
+							0b000 => Ok(Inst::Sfencevma),
+							0b001 => Ok(Inst::Csrrw     { rd, rs1, csr }),
+							0b010 => Ok(Inst::Csrrs     { rd, rs1, csr }),
+							0b011 => Ok(Inst::Csrrc     { rd, rs1, csr }),
+							0b101 => Ok(Inst::Csrrwi    { rd, uimm: rs1 as u64, csr }),
+							0b110 => Ok(Inst::Csrrsi    { rd, uimm: rs1 as u64, csr }),
+							0b111 => Ok(Inst::Csrrci    { rd, uimm: rs1 as u64, csr }),
 	                        _ => if func3 == 0 && rs1 == 0 && rd == 0 {
 	                            match imm {
 	                                0 => Ok(Inst::Ecall),

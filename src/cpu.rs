@@ -287,6 +287,7 @@ impl Cpu {
 				Ok(inst)
 			},
 			Inst::Fence { rd: _rd, rs1: _rs1, imm: _imm } => Ok(inst),
+			Inst::Sfencevma => Ok(inst),
 			Inst::Ecall {  } => Ok(inst),
 			Inst::Ebreak {  } => Ok(inst),
 
