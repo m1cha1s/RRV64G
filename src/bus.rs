@@ -42,34 +42,20 @@ impl<'a> Bus<'a> {
     }
 
     pub fn load(&self, addr: u64, size: u64) -> Result<u64, Exception> {
-        if addr >= RAM_BASE || addr < self.ram_size + RAM_BASE {
-            return self.ram.load(addr - RAM_BASE, size);
+        match addr {
+            RAM_BASE..=u64::MAX => self.ram.load(addr - RAM_BASE, size),
+            PLIC_BASE..=PLIC_END => self.plic.load(addr - PLIC_BASE, size),
+            CLINT_BASE..=CLINT_END => self.clint.load(addr - CLINT_BASE, size),
+            _ => Err(Exception::LoadAccessFault(addr)),
         }
-
-        if addr >= PLIC_BASE || addr < PLIC_END {
-            return self.plic.load(addr - PLIC_BASE, size);
-        }
-
-        if addr >= CLINT_BASE || addr < CLINT_END {
-            return self.clint.load(addr - CLINT_BASE, size);
-        }
-
-        Err(Exception::LoadAccessFault(addr))
     }
 
     pub fn store(&mut self, addr: u64, val: u64, size: u64) -> Result<(), Exception> {
-        if addr >= RAM_BASE || addr < self.ram_size + RAM_BASE {
-            return self.ram.store(addr - RAM_BASE, val, size);
+        match addr {
+            RAM_BASE.. => self.ram.store(addr - RAM_BASE, val, size),
+            PLIC_BASE..=PLIC_END => self.plic.store(addr - PLIC_BASE, val, size),
+            CLINT_BASE..=CLINT_END => self.clint.store(addr - CLINT_BASE, val, size),
+            _ => Err(Exception::StoreAMOAccessFault(addr)),
         }
-
-        if addr >= PLIC_BASE || addr < PLIC_END {
-            return self.plic.store(addr - PLIC_BASE, val, size);
-        }
-
-        if addr >= CLINT_BASE || addr < CLINT_END {
-            return self.clint.store(addr - CLINT_BASE, val, size);
-        }
-
-        Err(Exception::StoreAMOAccessFault(addr))
     }
 }
