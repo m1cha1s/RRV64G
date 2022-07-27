@@ -1,7 +1,4 @@
-use std::{
-    fs::File,
-    io::{self, Read},
-};
+use std::{fs::File, io, io::prelude::*};
 
 use rrv64g::prelude::*;
 
@@ -14,7 +11,7 @@ impl MemIntf for Mem {
         self.mem.clear();
     }
 
-    fn load(&self, addr: u64, size: u64) -> Result<u64, Exception> {
+    fn load(&mut self, addr: u64, size: u64) -> Result<u64, Exception> {
         let addr = addr as usize;
         if addr + ((size as usize) / 8) - 1 >= self.mem.len() {
             return Err(Exception::LoadAccessFault(addr as u64));
@@ -77,7 +74,7 @@ impl MemIntf for Mem {
 fn main() -> io::Result<()> {
     // Loading program from file
     //    let mut file = File::open("./examples/add-addi.bin")?;
-    let mut file = File::open("./examples/fib.bin")?;
+    let mut file = File::open("./examples/helloworld.bin")?;
     let mut code = Vec::new();
     file.read_to_end(&mut code)?;
     code.resize(1024 * 1024 * 128, 0);
@@ -92,11 +89,28 @@ fn main() -> io::Result<()> {
 
     println!("{:?}", vm.bus.load(0x8000_0000, 32));
 
+    let mut byte = [0];
+    let mut val: Option<char> = None;
     loop {
-        let e = vm.tick();
+        match io::stdin().read(&mut byte) {
+            Ok(c) => {
+                if c == 1 {
+                    val = Some(byte[0] as char)
+                } else if c == 0 {
+                    val = None
+                }
+            }
+            Err(e) => println!("{}", e),
+        }
+
+        let e = vm.tick(val);
 
         match e {
-            Ok(()) => println!("Tick"),
+            Ok(val) => {
+                if let Some(val) = val {
+                    print!("{}", val);
+                }
+            }
             Err(err) => {
                 println!("Err: {:?}, Cause: {}", err, vm.cpu.csr[MCAUSE]);
                 break;

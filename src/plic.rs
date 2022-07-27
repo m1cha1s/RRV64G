@@ -1,4 +1,4 @@
-use crate::prelude::{Exception, MemIntf};
+use crate::prelude::{Exception, MemIntf, PLIC_BASE};
 
 pub const PLIC_PENDING: u64 = 0x1000;
 pub const PLIC_SENABLE: u64 = 0x2000;
@@ -24,9 +24,9 @@ impl Plic {
 }
 
 impl MemIntf for Plic {
-    fn load(&self, addr: u64, size: u64) -> Result<u64, Exception> {
+    fn load(&mut self, addr: u64, size: u64) -> Result<u64, Exception> {
         if size != 32 {
-            return Err(Exception::LoadAccessFault(addr));
+            return Err(Exception::LoadAccessFault(addr + PLIC_BASE));
         }
 
         match addr {
@@ -40,7 +40,7 @@ impl MemIntf for Plic {
 
     fn store(&mut self, addr: u64, val: u64, size: u64) -> Result<(), Exception> {
         if size != 32 {
-            return Err(Exception::StoreAMOAccessFault(addr));
+            return Err(Exception::StoreAMOAccessFault(addr + PLIC_BASE));
         }
 
         match addr {

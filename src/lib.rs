@@ -9,6 +9,7 @@ pub mod csrs;
 pub mod exceptions;
 pub mod inst;
 pub mod plic;
+pub mod uart;
 pub mod vm;
 
 pub mod prelude {
@@ -18,5 +19,6 @@ pub mod prelude {
     pub use super::csrs::*;
     pub use super::exceptions::*;
     pub use super::plic::*;
+    pub use super::uart::*;
     pub use super::vm::*;
 }

@@ -19,7 +19,7 @@ impl<'a> VM<'a> {
         VM { bus, cpu }
     }
 
-    pub fn tick(&mut self) -> Result<(), Exception> {
+    pub fn tick(&mut self, char_in: Option<char>) -> Result<Option<char>, Exception> {
         match self.cpu.tick(&mut self.bus) {
             Ok(_inst) => {}
             Err(e) => {
@@ -33,7 +33,7 @@ impl<'a> VM<'a> {
         if self.cpu.pc == 0 {
             Err(Exception::Breakpoint(self.cpu.pc))
         } else {
-            Ok(())
+            Ok(self.bus.uart.tick(char_in))
         }
     }
 }
