@@ -84,26 +84,23 @@ fn main() -> io::Result<()> {
 
     let mut vm = VM::new(&mut mem, 1024 * 1024 * 128);
 
-    vm.cpu.pc = 0x8000_0000;
-    println!("{}", vm.cpu.pc);
+    vm.cpu.pc = RAM_BASE;
 
-    println!("{:?}", vm.bus.load(0x8000_0000, 32));
-
-    let mut byte = [0];
-    let mut val: Option<char> = None;
+    // let mut byte = [0];
+    // let mut val: Option<char> = None;
     loop {
-        match io::stdin().read(&mut byte) {
-            Ok(c) => {
-                if c == 1 {
-                    val = Some(byte[0] as char)
-                } else if c == 0 {
-                    val = None
-                }
-            }
-            Err(e) => println!("{}", e),
-        }
+        // match io::stdin().read(&mut byte) {
+        //     Ok(c) => {
+        //         if c == 1 {
+        //             val = Some(byte[0] as char)
+        //         } else if c == 0 {
+        //             val = None
+        //         }
+        //     }
+        //     Err(e) => println!("{}", e),
+        // }
 
-        let e = vm.tick(val);
+        let e = vm.tick(None);
 
         match e {
             Ok(val) => {

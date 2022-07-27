@@ -1,20 +1,18 @@
-void print(char* st);
-void println(char* st);
-
 int main() {
-  println("Hello world!");
-  return 0;
-}
-
-void print(char* st) {
   volatile char *uart = (volatile char *) 0x10000000;
-  for(int i = 0; i < (sizeof(st)/sizeof(char)); i ++) {
-    uart[0] = st[i];
-  }  
-}
-
-void println(char* st) {
-  volatile char *uart = (volatile char *) 0x10000000;
-  print(st);
+  uart[0] = 'H';
+  uart[0] = 'e';
+  uart[0] = 'l';
+  uart[0] = 'l';
+  uart[0] = 'o';
+  uart[0] = ',';
+  uart[0] = ' ';
+  uart[0] = 'w';
+  uart[0] = 'o';
+  uart[0] = 'r';
+  uart[0] = 'l';
+  uart[0] = 'd';
+  uart[0] = '!';
   uart[0] = '\n';
+  return 0;
 }
