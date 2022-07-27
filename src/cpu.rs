@@ -8,6 +8,7 @@ use crate::{
     csrs::*,
     exceptions::Exception,
     inst::{Inst, ENCODING_TABLE},
+    prelude::{Interrupt, PLIC_SCLAIM, UART_IRQ},
 };
 
 pub struct Cpu {
@@ -81,6 +82,94 @@ impl Cpu {
         status = (status & !MASK_PP) | (mode << pp_i);
 
         self.csr[STATUS] = status;
+    }
+
+    pub fn handle_interrupt(&mut self, interrupt: Interrupt) {
+        let pc = self.pc;
+        let mode = self.mode;
+        let cause = interrupt.code();
+
+        let trap_in_s_mode =
+            mode <= SUPERVISOR && (self.csr[MIDELEG].wrapping_shr(cause as u32) & 1) == 1;
+        let (STATUS, TVEC, CAUSE, TVAL, EPC, MASK_PIE, pie_i, MASK_IE, ie_i, MASK_PP, pp_i) =
+            if trap_in_s_mode {
+                self.mode = SUPERVISOR;
+                (
+                    SSTATUS, STVEC, SCAUSE, STVAL, SEPC, MASK_SPIE, 5, MASK_SIE, 1, MASK_SPP, 8,
+                )
+            } else {
+                self.mode = MACHINE;
+                (
+                    MSTATUS, MTVEC, MCAUSE, MTVAL, MEPC, MASK_MPIE, 7, MASK_MIE, 3, MASK_MPP, 11,
+                )
+            };
+
+        let tvec = self.csr[TVEC];
+        let tvec_mode = tvec & 0b11;
+        let tvec_base = tvec & !0b11;
+        match tvec_mode {
+            0 => self.pc = tvec_base,
+            1 => self.pc = tvec_base + cause << 2,
+            _ => unreachable!(),
+        }
+
+        self.csr[EPC] = pc;
+        self.csr[CAUSE] = cause;
+        self.csr[TVAL] = 0;
+
+        let mut status = self.csr[STATUS];
+        status = (status & !MASK_PIE) | (ie_i << pie_i);
+        status &= !MASK_IE;
+        status = (status & !MASK_PP) | (mode << pp_i);
+        self.csr[STATUS] = status;
+    }
+
+    pub fn check_pending_interrupt(
+        &mut self,
+        bus: &mut Bus,
+    ) -> Result<Option<Interrupt>, Exception> {
+        use Interrupt::*;
+
+        if (self.mode == MACHINE) && (self.csr[MSTATUS] & MASK_MIE) == 0 {
+            return Ok(None);
+        }
+        if (self.mode == SUPERVISOR) && (self.csr[SSTATUS] & MASK_SIE) == 0 {
+            return Ok(None);
+        }
+
+        if bus.uart.is_interrupting() {
+            bus.store(PLIC_SCLAIM, UART_IRQ, 32)?;
+            self.csr[MIP] |= MASK_SEIP;
+        }
+
+        let pending = self.csr[MIE] & self.csr[MIP];
+
+        if (pending & MASK_MEIP) != 0 {
+            self.csr[MIP] &= !MASK_MEIP;
+            return Ok(Some(MachineExternalInterrupt));
+        }
+        if (pending & MASK_MSIP) != 0 {
+            self.csr[MIP] &= !MASK_MSIP;
+            return Ok(Some(MachineSoftwareInterrupt));
+        }
+        if (pending & MASK_MTIP) != 0 {
+            self.csr[MIP] &= !MASK_MTIP;
+            return Ok(Some(MachineTimerInterrupt));
+        }
+        if (pending & MASK_SEIP) != 0 {
+            self.csr[MIP] &= !MASK_SEIP;
+            return Ok(Some(SupervisorExternalInterrupt));
+        }
+        if (pending & MASK_STIP) != 0 {
+            self.csr[MIP] &= !MASK_STIP;
+            return Ok(Some(SupervisorTimerInterrupt));
+        }
+        if (pending & MASK_SSIP) != 0 {
+            self.csr[MIP] &= !MASK_SSIP;
+            return Ok(Some(SupervisorSoftwareInterrupt));
+        }
+
+        Ok(None)
     }
 
     fn fetch(&mut self, bus: &mut Bus) -> Result<u32, Exception> {

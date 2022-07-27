@@ -30,6 +30,11 @@ impl<'a> VM<'a> {
             }
         }
 
+        match self.cpu.check_pending_interrupt(&mut self.bus)? {
+            Some(int) => self.cpu.handle_interrupt(int),
+            None => (),
+        }
+
         if self.cpu.pc == 0 {
             Err(Exception::Breakpoint(self.cpu.pc))
         } else {

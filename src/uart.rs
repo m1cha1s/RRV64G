@@ -60,6 +60,10 @@ impl Uart {
 
         None
     }
+
+    pub fn is_interrupting(&self) -> bool {
+        self.interrupt
+    }
 }
 
 impl MemIntf for Uart {
