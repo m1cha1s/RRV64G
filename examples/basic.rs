@@ -16,7 +16,7 @@ impl MemIntf for Mem {
 
     fn load(&self, addr: u64, size: u64) -> Result<u64, Exception> {
         let addr = addr as usize;
-        if addr + ((size as usize) / 8) - 1 < self.mem.len() {
+        if addr + ((size as usize) / 8) - 1 >= self.mem.len() {
             return Err(Exception::LoadAccessFault(addr as u64));
         }
 
@@ -94,7 +94,6 @@ fn main() -> io::Result<()> {
 
     loop {
         let e = vm.tick();
-        println!("{}", vm.cpu.pc);
 
         match e {
             Ok(()) => println!("Tick"),
