@@ -43,7 +43,7 @@ impl<'a> Bus<'a> {
 
     pub fn load(&self, addr: u64, size: u64) -> Result<u64, Exception> {
         match addr {
-            RAM_BASE.. => self.ram.load(addr - RAM_BASE, size),
+            RAM_BASE..=u64::MAX => self.ram.load(addr - RAM_BASE, size),
             PLIC_BASE..=PLIC_END => self.plic.load(addr - PLIC_BASE, size),
             CLINT_BASE..=CLINT_END => self.clint.load(addr - CLINT_BASE, size),
             _ => Err(Exception::LoadAccessFault(addr)),

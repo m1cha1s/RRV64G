@@ -16,21 +16,33 @@ impl MemIntf for Mem {
 
     fn load(&self, addr: u64, size: u64) -> Result<u64, Exception> {
         let addr = addr as usize;
-        if addr + (size / 8) - 1 < self.mem.len() {
-            return Err(Exception::AddressOutOfBounds(addr as u64));
+        if addr + ((size as usize) / 8) - 1 < self.mem.len() {
+            return Err(Exception::LoadAccessFault(addr as u64));
         }
-        
+
         match size {
             8 => Ok(self.mem[addr] as u64),
-            16 => Ok((self.mem[addr] as u64) | (self.mem[addr + 1] as u64 << 8)),
-            32 => Ok((self.mem[addr] as u64) | (self.mem[addr + 1] as u64) << 8 | (self.mem[addr + 2] as u64) << 16 || (self.mem[addr + 3] as u64) << 24),        }
+            16 => Ok((self.mem[addr] as u64) | (self.mem[addr + 1] as u64) << 8),
+            32 => Ok((self.mem[addr] as u64)
+                | (self.mem[addr + 1] as u64) << 8
+                | (self.mem[addr + 2] as u64) << 16
+                | (self.mem[addr + 3] as u64) << 24),
+            64 => Ok((self.mem[addr] as u64)
+                | (self.mem[addr + 1] as u64) << 8
+                | (self.mem[addr + 2] as u64) << 16
+                | (self.mem[addr + 3] as u64) << 24
+                | (self.mem[addr + 4] as u64) << 32
+                | (self.mem[addr + 5] as u64) << 40
+                | (self.mem[addr + 6] as u64) << 48
+                | (self.mem[addr + 7] as u64) << 56),
+            _ => Err(Exception::LoadAccessFault(addr as u64)),
         }
     }
 
     fn store(&mut self, addr: u64, val: u64, size: u64) -> Result<(), Exception> {
         let addr = addr as usize;
-        if addr + (size / 8) - 1 >= self.mem.len() {
-            return Err(Exception::AddressOutOfBounds(addr as u64));
+        if addr + ((size as usize) / 8) - 1 >= self.mem.len() {
+            return Err(Exception::StoreAMOAccessFault(addr as u64));
         }
 
         match size {
@@ -55,6 +67,7 @@ impl MemIntf for Mem {
                 self.mem[addr + 6] = ((val >> 48) & 0xff) as u8;
                 self.mem[addr + 7] = ((val >> 56) & 0xff) as u8;
             }
+            _ => return Err(Exception::StoreAMOAccessFault(addr as u64)),
         }
 
         Ok(())
@@ -75,14 +88,18 @@ fn main() -> io::Result<()> {
     let mut vm = VM::new(&mut mem, 1024 * 1024 * 128);
 
     vm.cpu.pc = 0x8000_0000;
+    println!("{}", vm.cpu.pc);
+
+    println!("{:?}", vm.bus.load(0x8000_0000, 32));
 
     loop {
         let e = vm.tick();
+        println!("{}", vm.cpu.pc);
 
         match e {
             Ok(()) => println!("Tick"),
             Err(err) => {
-                println!("{:?}", err);
+                println!("Err: {:?}, Cause: {}", err, vm.cpu.csr[MCAUSE]);
                 break;
             }
         }

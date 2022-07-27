@@ -50,7 +50,6 @@ impl Cpu {
         let mode = self.mode;
         let cause = e.code();
 
-        // TODO: Stopped here in development
         let trap_in_s_mode =
             mode <= SUPERVISOR && (self.csr[MEDELEG].wrapping_shr(cause as u32) & 1) == 1;
         let (STATUS, TVEC, CAUSE, TVAL, EPC, MASK_PIE, pie_i, MASK_IE, ie_i, MASK_PP, pp_i) =
