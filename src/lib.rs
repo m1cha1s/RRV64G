@@ -12,6 +12,7 @@ pub mod interrupt;
 pub mod plic;
 pub mod uart;
 pub mod virtio;
+pub mod virtqueue;
 pub mod vm;
 
 pub mod prelude {
@@ -24,5 +25,6 @@ pub mod prelude {
     pub use super::plic::*;
     pub use super::uart::*;
     pub use super::virtio::*;
+    pub use super::virtqueue::*;
     pub use super::vm::*;
 }

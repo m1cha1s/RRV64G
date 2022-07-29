@@ -1,6 +1,6 @@
 use crate::{
     exceptions::Exception,
-    prelude::{Clint, Plic, Uart},
+    prelude::{Clint, Plic, Uart, VirtioBlock},
 };
 
 pub const RAM_BASE: u64 = 0x8000_0000;
@@ -17,6 +17,10 @@ pub const UART_BASE: u64 = 0x1000_0000;
 pub const UART_SIZE: u64 = 0x100;
 pub const UART_END: u64 = UART_BASE + UART_SIZE - 1;
 
+pub const VIRTIO_BASE: u64 = 0x1000_1000;
+pub const VIRTIO_SIZE: u64 = 0x1000;
+pub const VIRTIO_END: u64 = VIRTIO_BASE + VIRTIO_SIZE - 1;
+
 pub trait MemIntf {
     fn reset(&mut self);
     fn load(&mut self, addr: u64, size: u64) -> Result<u64, Exception>;
@@ -31,16 +35,19 @@ pub struct Bus<'a> {
     pub clint: Clint,
 
     pub uart: Uart,
+
+    pub virt_blk: VirtioBlock<'a>,
 }
 
 impl<'a> Bus<'a> {
-    pub fn new(ram: &'a mut dyn MemIntf, ram_size: u64) -> Self {
+    pub fn new(ram: &'a mut dyn MemIntf, ram_size: u64, disk: &'a mut dyn MemIntf) -> Self {
         Bus {
             ram,
             ram_size,
             plic: Plic::new(),
             clint: Clint::new(),
             uart: Uart::new(),
+            virt_blk: VirtioBlock::new(disk),
         }
     }
 
@@ -57,6 +64,7 @@ impl<'a> Bus<'a> {
             PLIC_BASE..=PLIC_END => self.plic.load(addr - PLIC_BASE, size),
             CLINT_BASE..=CLINT_END => self.clint.load(addr - CLINT_BASE, size),
             UART_BASE..=UART_END => self.uart.load(addr - UART_BASE, size),
+            VIRTIO_BASE..=VIRTIO_END => self.virt_blk.load(addr, size),
             _ => Err(Exception::LoadAccessFault(addr)),
         }
     }
@@ -67,6 +75,7 @@ impl<'a> Bus<'a> {
             PLIC_BASE..=PLIC_END => self.plic.store(addr - PLIC_BASE, val, size),
             CLINT_BASE..=CLINT_END => self.clint.store(addr - CLINT_BASE, val, size),
             UART_BASE..=UART_END => self.uart.store(addr - UART_BASE, val, size),
+            VIRTIO_BASE..=VIRTIO_END => self.virt_blk.store(addr, val, size),
             _ => Err(Exception::StoreAMOAccessFault(addr)),
         }
     }
