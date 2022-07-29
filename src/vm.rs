@@ -10,8 +10,8 @@ pub struct VM<'a> {
 }
 
 impl<'a> VM<'a> {
-    pub fn new(ram_intf: &'a mut dyn MemIntf, ram_len: u64) -> Self {
-        let bus = Bus::new(ram_intf, ram_len);
+    pub fn new(ram_intf: &'a mut dyn MemIntf, ram_len: u64, disk: &'a mut dyn MemIntf) -> Self {
+        let bus = Bus::new(ram_intf, ram_len, disk);
         let mut cpu = Cpu::new();
 
         cpu.x[2] = RAM_BASE + ram_len;

@@ -87,7 +87,7 @@ impl<'a> VirtioBlock<'a> {
     }
 
     // FIXME: used uwraps from lack of energy :)
-    pub fn read_disk(&self, addr: u64) -> u64 {
+    pub fn read_disk(&mut self, addr: u64) -> u64 {
         self.disk.load(addr, 8).unwrap()
     }
 

@@ -11,7 +11,8 @@ use crate::{
     exceptions::Exception,
     inst::{Inst, ENCODING_TABLE},
     prelude::{
-        Interrupt, VirtqAvail, VirtqDesc, VirtqUsed, DESC_NUM, PAGE_SIZE, PLIC_SCLAIM, UART_IRQ,
+        Interrupt, VirtioBlkRequest, VirtqAvail, VirtqDesc, VirtqUsed, DESC_NUM, PAGE_SIZE,
+        PLIC_SCLAIM, SECTOR_SIZE, UART_IRQ,
     },
 };
 
@@ -187,48 +188,54 @@ impl Cpu {
         let virtq_used = unsafe { &(*(used_addr as *const VirtqUsed)) };
 
         let idx = bus.load(&virtq_avail.idx as *const _ as u64, 16).unwrap() as usize;
-        let index = bus.load(&virtq_avail.ring[idx % DESC_NUM] as *const _ as u64, 16).unwrap();
-        
+        let index = bus
+            .load(&virtq_avail.ring[idx % DESC_NUM] as *const _ as u64, 16)
+            .unwrap();
+
         // The first descriptor:
         // which contains the request information and a pointer to the data descriptor.
         let desc_addr0 = desc_addr + desc_size * index;
         let virtq_desc0 = unsafe { &(*(desc_addr0 as *const VirtqDesc)) };
-        // The addr field points to a virtio block request. We need the sector number stored 
+        // The addr field points to a virtio block request. We need the sector number stored
         // in the sector field. The iotype tells us whether to read or write.
         let req_addr = bus.load(&virtq_desc0.addr as *const _ as u64, 64).unwrap();
         let virtq_blk_req = unsafe { &(*(req_addr as *const VirtioBlkRequest)) };
-        let blk_sector = bus.load(&virtq_blk_req.sector as *const _ as u64, 64).unwrap();
-        let iotype = bus.load(&virtq_blk_req.iotype as *const _ as u64, 32).unwrap() as u32;
+        let blk_sector = bus
+            .load(&virtq_blk_req.sector as *const _ as u64, 64)
+            .unwrap();
+        let iotype = bus
+            .load(&virtq_blk_req.iotype as *const _ as u64, 32)
+            .unwrap() as u32;
         // The next field points to the second descriptor. (data descriptor)
-        let next0  = bus.load(&virtq_desc0.next  as *const _ as u64, 16).unwrap();
+        let next0 = bus.load(&virtq_desc0.next as *const _ as u64, 16).unwrap();
 
-        // the second descriptor. 
+        // the second descriptor.
         let desc_addr1 = desc_addr + desc_size * next0;
         let virtq_desc1 = unsafe { &(*(desc_addr1 as *const VirtqDesc)) };
         // The addr field points to the data to read or write
-        let addr1  = bus.load(&virtq_desc1.addr  as *const _ as u64, 64).unwrap();
+        let addr1 = bus.load(&virtq_desc1.addr as *const _ as u64, 64).unwrap();
         // the len donates the size of the data
-        let len1   = bus.load(&virtq_desc1.len   as *const _ as u64, 32).unwrap();
+        let len1 = bus.load(&virtq_desc1.len as *const _ as u64, 32).unwrap();
 
         match iotype {
-                VIRTIO_BLK_T_OUT => {
-                        for i in 0..len1 {
-                                let data = bus.load(addr1 + i, 8).unwrap();
-                                bus.virtio_blk.write_disk(blk_sector * SECTOR_SIZE + i, data);
-                            }
-                    }
-                VIRTIO_BLK_T_IN => {
-                        for i in 0..len1 {
-                                let data = self.bus.virtio_blk.read_disk(blk_sector * SECTOR_SIZE + i);
-                                bus.store(addr1 + i, 8, data as u64).unwrap();
-                            }
-                    } 
-                _ => unreachable!(),
-            }       
-
-        let new_id = bus.virtio_blk.get_new_id();
-        bus.store(&virtq_used.idx as *const _ as u64, 16, new_id % 8).unwrap();
+            VIRTIO_BLK_T_OUT => {
+                for i in 0..len1 {
+                    let data = bus.load(addr1 + i, 8).unwrap();
+                    bus.virt_blk.write_disk(blk_sector * SECTOR_SIZE + i, data);
+                }
+            }
+            VIRTIO_BLK_T_IN => {
+                for i in 0..len1 {
+                    let data = bus.virt_blk.read_disk(blk_sector * SECTOR_SIZE + i);
+                    bus.store(addr1 + i, 8, data as u64).unwrap();
+                }
+            }
+            _ => unreachable!(),
         }
+
+        let new_id = bus.virt_blk.get_new_id();
+        bus.store(&virtq_used.idx as *const _ as u64, 16, new_id % 8)
+            .unwrap();
     }
 
     fn fetch(&mut self, bus: &mut Bus) -> Result<u32, Exception> {
@@ -498,8 +505,8 @@ impl Cpu {
                 imm: _imm,
             } => Ok(inst),
             Inst::Sfencevma => Ok(inst),
-            Inst::Ecall {} => Ok(inst),
-            Inst::Ebreak {} => Ok(inst),
+            Inst::Ecall => Ok(inst),
+            Inst::Ebreak => Ok(inst),
 
             // CSRs implementation
             Inst::Csrrw { rd, rs1, csr } => {
